@@ -1,6 +1,6 @@
 # Streamix
 
-Streamix is a cloud-native media processing platform built to explore the engineering behind large-scale video infrastructure.
+Streamix is a distributed media processing platform built to explore the engineering behind large-scale video infrastructure.
 
 The project allows users to upload videos, process them through a distributed transcoding pipeline, generate adaptive streaming outputs, and monitor processing jobs in real time.
 
