@@ -1,5 +1,10 @@
-import { redirect } from 'next/navigation'
+import React from 'react'
 
-export default function HomePage() {
-  redirect('/components/dashboard')
+export default function page() {
+  return (
+    <div>
+      <h1>Welcome to the Web App!</h1>
+      <p>This is the main page of the web application.</p>
+    </div>
+  )
 }

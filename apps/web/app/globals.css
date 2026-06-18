@@ -1,120 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
-
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 30 20% 97%;
-    --background-subtle: 28 18% 94%;
-    --foreground: 20 10% 8%;
-    --foreground-muted: 20 8% 38%;
-    --foreground-subtle: 20 6% 58%;
+:root {
+  --background: 36 33% 97%;
+  --foreground: 24 10% 10%;
 
-    --accent: 24 95% 53%;
-    --accent-hover: 24 95% 47%;
-    --accent-muted: 24 90% 96%;
-    --accent-border: 24 80% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 24 10% 10%;
 
-    --surface: 0 0% 100%;
-    --surface-hover: 28 20% 97%;
-    --surface-raised: 0 0% 100%;
-    --border: 28 15% 88%;
-    --border-subtle: 28 12% 93%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 24 10% 10%;
 
-    --success: 142 70% 40%;
-    --success-bg: 142 60% 96%;
-    --warning: 38 95% 50%;
-    --warning-bg: 38 100% 96%;
-    --error: 0 72% 51%;
-    --error-bg: 0 72% 97%;
-    --processing: 217 91% 60%;
-    --processing-bg: 217 91% 96%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 0 0% 100%;
 
-    --sidebar-width: 240px;
-    --sidebar-bg: 20 12% 10%;
-    --sidebar-fg: 28 15% 85%;
-    --sidebar-fg-muted: 28 10% 50%;
-    --sidebar-border: 20 10% 16%;
-    --sidebar-accent: 24 95% 53%;
-    --sidebar-item-hover: 20 10% 15%;
-    --sidebar-item-active: 20 10% 18%;
+  --secondary: 30 20% 94%;
+  --secondary-foreground: 24 10% 10%;
 
-    --navbar-height: 56px;
+  --muted: 30 20% 94%;
+  --muted-foreground: 24 5% 45%;
 
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
+  --accent: 28 95% 92%;
+  --accent-foreground: 24 10% 10%;
 
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
 
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-    --shadow-md: 0 4px 12px 0 rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.04);
-    --shadow-lg: 0 10px 30px -5px rgb(0 0 0 / 0.08), 0 4px 10px -5px rgb(0 0 0 / 0.04);
-    --shadow-accent: 0 4px 20px -4px hsl(24 95% 53% / 0.35);
-  }
+  --border: 24 15% 88%;
+  --input: 24 15% 88%;
+  --ring: 24 95% 53%;
+
+  --radius: 0.8rem;
 }
 
-@layer base {
-  * { box-sizing: border-box; }
-  html {
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: var(--font-body);
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-@layer utilities {
-  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 99px;
-  }
-  .skeleton {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--background-subtle)) 25%,
-      hsl(var(--border-subtle)) 50%,
-      hsl(var(--background-subtle)) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: var(--radius-sm);
-  }
+* {
+  border-color: hsl(var(--border));
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulseAccent {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-pulse-accent { animation: pulseAccent 2s ease-in-out infinite; }
