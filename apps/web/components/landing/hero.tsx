@@ -2,68 +2,51 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="py-32 lg:py-40">
+    <section className="relative py-40 lg:py-30">
       <div className="max-w-7xl mx-auto px-6">
 
-        <div className="max-w-4xl">
+        <div className="max-w-5xl">
 
-          <span className="inline-flex px-4 py-2 rounded-full border border-stone-300 text-sm">
-            Media processing infrastructure for developers.
-          </span>
+          <div className="uppercase tracking-[0.3em] text-xs text-stone-500">
+            Distributed Media Platform · Go · FFmpeg · Kubernetes
+          </div>
 
-          <h1 className="mt-8 text-6xl lg:text-8xl font-bold tracking-tight leading-none">
-            Video infrastructure
-            <br />
-            for modern applications.
+          <h1 className="mt-8 leading-[0.9]">
+            <span className="block text-[5rem] lg:text-[9rem] font-serif font-medium text-stone-900">
+              Process
+            </span>
+
+            <span className="block text-[5rem] lg:text-[9rem] font-serif italic text-orange-600">
+              video
+            </span>
+
+            <span className="block text-[5rem] lg:text-[9rem] font-serif font-medium text-stone-900">
+              at scale.
+            </span>
           </h1>
 
-          <p className="mt-8 text-xl text-stone-600 max-w-2xl leading-relaxed">
-            Upload, transcode, process and deliver media at scale.
-            Built with Go, Redis Streams, FFmpeg, PostgreSQL,
-            S3 and Kubernetes.
+          <p className="mt-10 max-w-2xl text-xl text-stone-600 leading-relaxed">
+            StreamiX explores the systems behind modern media
+            platforms. Upload, queue, transcode, distribute and
+            stream video through a distributed cloud-native pipeline.
           </p>
 
-          <div className="flex gap-4 mt-10">
+          <div className="flex gap-4 mt-12">
             <Link
               href="/dashboard"
-              className="px-6 py-3 rounded-lg bg-orange-500 text-white font-medium"
+              className="px-8 py-4 bg-stone-900 text-white rounded-full"
             >
-              Start Building
+              Open Dashboard
             </Link>
 
-            <a
-              href="#pricing"
-              className="px-6 py-3 rounded-lg border border-stone-300"
+            <Link
+              href="#architecture"
+              className="px-8 py-4 border rounded-full"
             >
-              View Pricing
-            </a>
+              Architecture
+            </Link>
           </div>
         </div>
-
-        <div className="mt-24 border border-stone-200 rounded-3xl bg-white p-10">
-          <div className="grid md:grid-cols-5 gap-4 text-center">
-            <div className="p-5 rounded-xl bg-stone-50">
-              Upload
-            </div>
-
-            <div className="p-5 rounded-xl bg-stone-50">
-              Redis
-            </div>
-
-            <div className="p-5 rounded-xl bg-stone-50">
-              Workers
-            </div>
-
-            <div className="p-5 rounded-xl bg-stone-50">
-              FFmpeg
-            </div>
-
-            <div className="p-5 rounded-xl bg-stone-50">
-              S3
-            </div>
-          </div>
-        </div>
-
       </div>
     </section>
   );

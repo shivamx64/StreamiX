@@ -24,3 +24,11 @@ h3,
 h4 {
   font-family: var(--font-manrope);
 }
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
