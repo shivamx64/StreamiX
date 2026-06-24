@@ -7,7 +7,7 @@ export function Navbar() {
 
         <Link
           href="/"
-          className="font-serif text-4xl tracking-tight"
+          className="font-serif text-3xl tracking-tight"
         >
           StreamiX
         </Link>

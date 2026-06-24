@@ -10,6 +10,20 @@
 
   --muted: #78716c;
 }
+/* Tech stack section in the landing page */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
 
 body {
   background: var(--background);

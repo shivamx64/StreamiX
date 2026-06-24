@@ -2,24 +2,29 @@ import Link from "next/link";
 
 export function CTA() {
   return (
-    <section className="py-32">
-      <div className="max-w-4xl mx-auto px-6 text-center">
+    <section className="py-40 border-t border-stone-200">
+      <div className="max-w-6xl mx-auto px-6">
 
-        <h2 className="text-6xl font-bold tracking-tight">
-          Learn distributed systems
+        <h2 className="font-serif text-6xl lg:text-9xl leading-[0.9]">
+          The best way
           <br />
-          by building real infrastructure.
+          to learn
+          <span className="italic text-orange-700">
+            {" "}distributed systems
+          </span>
+          <br />
+          is to build one.
         </h2>
 
-        <p className="mt-6 text-lg text-stone-600">
-          StreamiX combines backend engineering,
-          distributed systems and cloud-native infrastructure
-          into a single project.
+        <p className="mt-10 max-w-2xl text-xl text-stone-600">
+          StreamiX combines distributed systems, cloud-native
+          infrastructure, media processing and backend engineering
+          into a single production-grade project.
         </p>
 
         <Link
           href="/dashboard"
-          className="inline-flex mt-10 px-8 py-4 rounded-lg bg-orange-500 text-white font-medium"
+          className="inline-flex mt-12 px-8 py-4 rounded-full bg-stone-900 text-white"
         >
           Open Dashboard
         </Link>

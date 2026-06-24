@@ -1,34 +1,27 @@
-import {
-  Activity,
-  Database,
-  Cpu,
-  Video,
-} from "lucide-react";
-
 const features = [
   {
-    title: "Distributed Processing",
+    number: "01",
+    title: "Distributed Workers",
     description:
-      "Scale video processing horizontally using worker nodes.",
-    icon: Cpu,
+      "Horizontally scalable worker nodes consume jobs from Redis Streams and process media independently.",
   },
   {
-    title: "Object Storage",
-    description:
-      "Store original and transcoded media reliably in S3.",
-    icon: Database,
-  },
-  {
-    title: "Realtime Monitoring",
-    description:
-      "Observe jobs, workers and system health instantly.",
-    icon: Activity,
-  },
-  {
+    number: "02",
     title: "Adaptive Streaming",
     description:
-      "Generate HLS streams optimized for every device.",
-    icon: Video,
+      "Generate HLS playlists and multiple renditions for optimal playback on every device.",
+  },
+  {
+    number: "03",
+    title: "Object Storage",
+    description:
+      "Store original assets, thumbnails and transcoded outputs in S3-compatible storage.",
+  },
+  {
+    number: "04",
+    title: "Realtime Visibility",
+    description:
+      "Monitor jobs, worker health and processing progress from a modern dashboard.",
   },
 ];
 
@@ -36,37 +29,34 @@ export function Features() {
   return (
     <section
       id="features"
-      className="py-32"
+      className="py-40 border-t border-stone-200"
     >
       <div className="max-w-7xl mx-auto px-6">
 
-        <h2 className="text-5xl font-bold tracking-tight">
-          Designed for scale.
+        <h2 className="font-serif text-6xl lg:text-8xl">
+          Built for
+          <span className="italic text-orange-600"> systems.</span>
         </h2>
 
-        <p className="mt-4 text-lg text-stone-600">
-          Everything needed for modern media workflows.
-        </p>
+        <div className="grid lg:grid-cols-2 gap-20 mt-24">
 
-        <div className="grid md:grid-cols-2 gap-6 mt-16">
           {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="border border-stone-200 rounded-2xl bg-white p-8"
-            >
-              <feature.icon className="w-6 h-6 text-orange-500" />
+            <div key={feature.number}>
+              <div className="text-orange-600 text-sm tracking-widest">
+                {feature.number}
+              </div>
 
-              <h3 className="mt-5 text-2xl font-semibold">
+              <h3 className="mt-4 font-serif text-5xl leading-none">
                 {feature.title}
               </h3>
 
-              <p className="mt-3 text-stone-600">
+              <p className="mt-6 text-lg text-stone-600 leading-relaxed">
                 {feature.description}
               </p>
             </div>
           ))}
-        </div>
 
+        </div>
       </div>
     </section>
   );
