@@ -22,49 +22,82 @@ export function Hero() {
             Built with Go, Redis Streams, FFmpeg, PostgreSQL,
             S3 and Kubernetes.
           </p>
+          <h1 className="mt-10 leading-[0.88]">
+            <span className="block font-serif text-[5rem] lg:text-[8rem]">
+              Process
+            </span>
 
-          <div className="flex gap-4 mt-10">
+            <span className="block font-serif italic text-[5rem] lg:text-[8rem] text-orange-700">
+              video
+            </span>
+
+            <span className="block font-serif text-[5rem] lg:text-[8rem]">
+              at scale.
+            </span>
+          </h1>
+
+          <p className="mt-10 max-w-xl text-xl leading-relaxed text-stone-600">
+            Upload, transcode, optimize, and deliver images, videos, and audio with a
+            single API. Built for developers and businesses that need reliable media
+            pipelines at scale.
+          </p>
+
+          <div className="flex flex-wrap gap-4 mt-12">
             <Link
               href="/dashboard"
-              className="px-6 py-3 rounded-lg bg-orange-500 text-white font-medium"
+              className="px-8 py-4 rounded-full bg-stone-900 text-white"
             >
-              Start Building
+              Open Dashboard
             </Link>
 
             <a
+              href="#features"
+              className="px-8 py-4 rounded-full border border-stone-300"
+            >
+              Explore Features
+            </a>
+
+            <a
               href="#pricing"
-              className="px-6 py-3 rounded-lg border border-stone-300"
+              className="px-8 py-4 rounded-full border border-stone-300"
             >
               View Pricing
             </a>
           </div>
+          <a
+            href="#pricing"
+            className="px-6 py-3 rounded-lg border border-stone-300"
+          >
+            View Pricing
+          </a>
         </div>
+      </div>
 
-        <div className="mt-24 border border-stone-200 rounded-3xl bg-white p-10">
-          <div className="grid md:grid-cols-5 gap-4 text-center">
-            <div className="p-5 rounded-xl bg-stone-50">
-              Upload
-            </div>
+      <div className="mt-24 border border-stone-200 rounded-3xl bg-white p-10">
+        <div className="grid md:grid-cols-5 gap-4 text-center">
+          <div className="p-5 rounded-xl bg-stone-50">
+            Upload
+          </div>
 
-            <div className="p-5 rounded-xl bg-stone-50">
-              Redis
-            </div>
+          <div className="p-5 rounded-xl bg-stone-50">
+            Redis
+          </div>
 
-            <div className="p-5 rounded-xl bg-stone-50">
-              Workers
-            </div>
+          <div className="p-5 rounded-xl bg-stone-50">
+            Workers
+          </div>
 
-            <div className="p-5 rounded-xl bg-stone-50">
-              FFmpeg
-            </div>
+          <div className="p-5 rounded-xl bg-stone-50">
+            FFmpeg
+          </div>
 
-            <div className="p-5 rounded-xl bg-stone-50">
-              S3
-            </div>
+          <div className="p-5 rounded-xl bg-stone-50">
+            S3
           </div>
         </div>
-
       </div>
+
+    </div>
     </section>
   );
 }
