@@ -1,9 +1,19 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"
+
+import { Navbar } from "@/components/landing/navbar"
 
 export default function MarketingLayout({
   children,
 }: {
-  children: ReactNode;
+  children: ReactNode
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+
+      <main>
+        {children}
+      </main>
+    </>
+  )
 }
