@@ -1,14 +1,18 @@
 package container
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
+	"github.com/gin-gonic/gin"
 
-	"github.com/shivamx64/streamix/internal/config"
+	"streamix/apps/api/internal/routes"
 )
 
 type Container struct {
-	Config *config.Config
-	Logger *zap.Logger
-	DB     *pgxpool.Pool
+}
+
+func New() *Container {
+	return &Container{}
+}
+
+func (c *Container) RegisterRoutes(router *gin.Engine) {
+	routes.Register(router)
 }
