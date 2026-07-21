@@ -9,34 +9,20 @@ import { AuthProvider } from "@/providers/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "StreamiX",
-    template: "%s • StreamiX",
-  },
-  description:
-    "Distributed media processing platform built with Go, Redis Streams, FFmpeg, PostgreSQL, S3 and Kubernetes.",
-  keywords: [
-    "Go",
-    "FFmpeg",
-    "Redis Streams",
-    "Video Processing",
-    "Media Pipeline",
-    "Kubernetes",
-    "Distributed Systems",
-  ],
+  title: "StreamiX",
+  description: "Distributed Media Processing Platform",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
           <QueryProvider>
