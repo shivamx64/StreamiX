@@ -11,7 +11,7 @@ import (
 type Container struct {
 	Config *config.Config
 	Logger *slog.Logger
-	DB 	   *gorm.DB
+	DB     *gorm.DB
 }
 
 // New constructs and returns the application's dependency container.

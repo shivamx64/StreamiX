@@ -17,7 +17,7 @@ type Config struct {
 }
 
 // AppConfig contains metatadata about the running application
-type AppConfig struct{
+type AppConfig struct {
 	// Name is the application name used in logs and metrics.
 	Name string
 
@@ -43,7 +43,6 @@ type HTTPConfig struct {
 func (h HTTPConfig) Address() string {
 	return fmt.Sprintf("%s:%d", h.Host, h.Port)
 }
-
 
 // DatabaseConfig contains PostgreSQL connection settings.
 type DatabaseConfig struct {
