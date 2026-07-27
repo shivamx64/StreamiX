@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"streamix/apps/api/internal/container"
+	"github.com/shivamx64/streamix/apps/api/internal/container"
 )
 
 type Application struct {
