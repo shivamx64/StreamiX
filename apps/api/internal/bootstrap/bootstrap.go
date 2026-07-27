@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/shivamx64/streamix/apps/api/internal/container"
+	"github.com/shivamx64/streamix/apps/api/internal/routes"
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/database"
 	"github.com/shivamx64/streamix/internal/logger"
@@ -16,7 +17,8 @@ type Application struct {
 	Router    *gin.Engine
 }
 
-// New initializes the application's dependencies and returns a ready-to-run Application.
+// New initializes all application dependencies and returns
+// a fully configured Application.
 func New() (*Application, error) {
 	cfg, err := config.Load()
 	if err != nil {
@@ -33,6 +35,8 @@ func New() (*Application, error) {
 	c := container.New(cfg, log, db)
 
 	router := gin.New()
+
+	routes.Register(router, c)
 
 	return &Application{
 		Container: c,

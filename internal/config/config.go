@@ -1,5 +1,9 @@
 package config
 
+import (
+	"fmt"
+)
+
 // Config represents the application's runtime configuration.
 //
 // It aggregates the configuration for all application components.
@@ -34,6 +38,12 @@ type HTTPConfig struct {
 	// Port is the HTTP server port.
 	Port int
 }
+
+// Address returns the HTTP server address in host:port format.
+func (h HTTPConfig) Address() string {
+	return fmt.Sprintf("%s:%d", h.Host, h.Port)
+}
+
 
 // DatabaseConfig contains PostgreSQL connection settings.
 type DatabaseConfig struct {
