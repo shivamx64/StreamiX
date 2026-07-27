@@ -1,13 +1,25 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
 
-func Register(router *gin.Engine) {
+	"github.com/gin-gonic/gin"
 
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
+	"github.com/shivamx64/streamix/apps/api/internal/container"
+)
+
+// Register configures all HTTP routes for the application.
+func Register(router *gin.Engine, c *container.Container) {
+	router.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Service is healthy",
 		})
 	})
 
+	api := router.Group("/api/v1")
+
+	// Future feature modules will register their routes here.
+	_ = api
+	_ = c
 }
