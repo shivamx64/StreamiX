@@ -14,9 +14,15 @@ type Container struct {
 	DB 	   *gorm.DB
 }
 
-// This new function constructs a dependency container
+// New constructs and returns the application's dependency container.
 func New(
-	cfg 	*config.Config,
-	logger	*slog.Logger,
-	db 		*gorm.DB,
-)
+	cfg *config.Config,
+	logger *slog.Logger,
+	db *gorm.DB,
+) *Container {
+	return &Container{
+		Config: cfg,
+		Logger: logger,
+		DB:     db,
+	}
+}

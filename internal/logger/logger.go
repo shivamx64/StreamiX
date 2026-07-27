@@ -8,7 +8,7 @@ import (
 )
 
 // This new function will create and configure the application's logger.
-func new(cfg *config.Config) *slog.Logger {
+func New(cfg *config.Config) *slog.Logger {
 	var handler slog.Handler
 
 	opts := &slog.HandlerOptions{
