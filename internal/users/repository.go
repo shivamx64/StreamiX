@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -13,7 +14,6 @@ type Repository interface {
 	FindByID(ctx context.Context, id string) (*User, error)
 }
 
-// repository implements Repository using PostgreSQL.
 type repository struct {
 	db *gorm.DB
 }
@@ -25,15 +25,25 @@ func NewRepository(db *gorm.DB) Repository {
 	}
 }
 
+// Create stores a user in database.
 func (r *repository) Create(
 	ctx context.Context,
 	user *User,
 ) error {
 
-	return r.db.WithContext(ctx).Create(user).Error
+	err := r.db.
+		WithContext(ctx).
+		Create(user).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-
+// FindByEmail retrieves a user by email.
 func (r *repository) FindByEmail(
 	ctx context.Context,
 	email string,
@@ -47,6 +57,10 @@ func (r *repository) FindByEmail(
 		First(&user).
 		Error
 
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrNotFound
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +68,7 @@ func (r *repository) FindByEmail(
 	return &user, nil
 }
 
-
+// FindByID retrieves a user by ID.
 func (r *repository) FindByID(
 	ctx context.Context,
 	id string,
@@ -66,6 +80,10 @@ func (r *repository) FindByID(
 		WithContext(ctx).
 		First(&user, "id = ?", id).
 		Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, ErrNotFound
+	}
 
 	if err != nil {
 		return nil, err

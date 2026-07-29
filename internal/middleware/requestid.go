@@ -5,10 +5,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const(
-	RequestIDKey = "request_id"
+const (
+	RequestIDKey    = "request_id"
 	RequestIDHeader = "X-Request-ID"
-)	
+)
 
 // RequestID assigns a unique identifier to every incoming request.
 func RequestID() gin.HandlerFunc {
@@ -16,7 +16,7 @@ func RequestID() gin.HandlerFunc {
 		requestID := uuid.NewString()
 
 		c.Set(RequestIDKey, requestID)
-		
+
 		c.Writer.Header().Set(RequestIDHeader, requestID)
 
 		c.Next()

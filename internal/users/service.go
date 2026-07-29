@@ -9,7 +9,11 @@ import (
 
 // Service defines user business operations.
 type Service interface {
-	Register(ctx context.Context, email string, password string) (*User, error)
+	Register(
+		ctx context.Context,
+		email string,
+		password string,
+	) (*User, error)
 }
 
 type service struct {
@@ -23,17 +27,24 @@ func NewService(repository Repository) Service {
 	}
 }
 
-// Register creates a new user account.
+// Register creates a new user.
 func (s *service) Register(
 	ctx context.Context,
 	email string,
 	password string,
 ) (*User, error) {
 
-	existingUser, err := s.repository.FindByEmail(ctx, email)
+	existingUser, err := s.repository.FindByEmail(
+		ctx,
+		email,
+	)
 
 	if err == nil && existingUser != nil {
-		return nil, errors.New("email already registered")
+		return nil, ErrEmailExists
+	}
+
+	if !errors.Is(err, ErrNotFound) && err != nil {
+		return nil, err
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword(
@@ -50,7 +61,10 @@ func (s *service) Register(
 		PasswordHash: string(passwordHash),
 	}
 
-	err = s.repository.Create(ctx, user)
+	err = s.repository.Create(
+		ctx,
+		user,
+	)
 
 	if err != nil {
 		return nil, err
