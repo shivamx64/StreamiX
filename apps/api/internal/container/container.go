@@ -17,7 +17,6 @@ type Container struct {
 	UserHandler *users.Handler
 }
 
-
 func New(
 	cfg *config.Config,
 	logger *slog.Logger,
@@ -36,7 +35,7 @@ func New(
 	return &Container{
 		Config: cfg,
 		Logger: logger,
-		DB: db,
+		DB:     db,
 
 		UserHandler: userHandler,
 	}

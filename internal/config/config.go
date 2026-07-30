@@ -15,7 +15,7 @@ type Config struct {
 	App      AppConfig
 	HTTP     HTTPConfig
 	Database DatabaseConfig
-	Auth	 AuthConfig
+	Auth     AuthConfig
 }
 
 // AppConfig contains metatadata about the running application
