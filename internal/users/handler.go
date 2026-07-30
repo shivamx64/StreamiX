@@ -20,16 +20,13 @@ func NewHandler(service Service) *Handler {
 
 // Register handles user registration.
 func (h *Handler) Register(ctx *gin.Context) {
-
 	var request RegisterRequest
-
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 
 		apphttp.BadRequest(
 			ctx,
 			"invalid request payload",
 		)
-
 		return
 	}
 
@@ -40,21 +37,15 @@ func (h *Handler) Register(ctx *gin.Context) {
 	)
 
 	if err != nil {
-
 		switch err {
-
 		case ErrEmailExists:
-
 			apphttp.Conflict(
 				ctx,
 				"email already registered",
 			)
-
 		default:
-
 			apphttp.InternalServerError(ctx)
 		}
-
 		return
 	}
 

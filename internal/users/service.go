@@ -15,6 +15,12 @@ type Service interface {
 		email string,
 		password string,
 	) (*User, error)
+
+	Login(
+		ctx context.Context,
+		email string,
+		password string,
+	) (*LoginResponse, error)
 }
 
 type service struct {
@@ -77,4 +83,49 @@ func (s *service) Register(
 	}
 
 	return user, nil
+}
+
+// Login authenticates a user and returns JWT tokens.
+func (s *service) Login(
+	ctx context.Context,
+	email string,
+	password string,
+) (*LoginResponse, error) {
+
+	user, err := s.repository.FindByEmail(
+		ctx,
+		email,
+	)
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(password),
+	)
+	if err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	accessToken, err := s.tokenManager.GenerateAccessToken(
+		user.ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := s.tokenManager.GenerateRefreshToken(
+		user.ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    s.tokenManager.AccessTokenExpiresIn(),
+	}, nil
 }

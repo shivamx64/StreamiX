@@ -18,9 +18,9 @@ type Claims struct {
 
 // TokenManager is responsible for generating and validating JWTs.
 type TokenManager struct {
-	secret           []byte
-	accessTokenTTL   time.Duration
-	refreshTokenTTL  time.Duration
+	secret          []byte
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
 // NewTokenManager creates a new JWT token manager.
@@ -42,6 +42,11 @@ func (m *TokenManager) GenerateRefreshToken(userID string) (string, error) {
 	return m.generateToken(userID, m.refreshTokenTTL)
 }
 
+// AccessTokenExpiresIn returns the access token lifetime in seconds.
+func (m *TokenManager) AccessTokenExpiresIn() int64 {
+	return int64(m.accessTokenTTL.Seconds())
+}
+
 // ValidateToken validates a JWT and returns its claims.
 func (m *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
 
@@ -49,24 +54,19 @@ func (m *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
 		tokenString,
 		&Claims{},
 		func(token *jwt.Token) (any, error) {
-
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, errors.New("unexpected signing method")
 			}
-
 			return m.secret, nil
 		},
 	)
-
 	if err != nil {
 		return nil, err
 	}
-
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-
 	return claims, nil
 }
 
@@ -77,7 +77,6 @@ func (m *TokenManager) generateToken(
 ) (string, error) {
 
 	now := time.Now()
-
 	claims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -86,11 +85,9 @@ func (m *TokenManager) generateToken(
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 		},
 	}
-
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		claims,
 	)
-
 	return token.SignedString(m.secret)
 }
