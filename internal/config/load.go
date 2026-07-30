@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -47,6 +48,31 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 
+	jwtSecret, err := requireEnv("JWT_SECRET")
+	if err != nil {
+		return nil, err
+	}
+
+	accessTokenTTL, err := time.ParseDuration(
+		getEnv("JWT_ACCESS_TOKEN_TTL", "15m"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"configuration error: JWT_ACCESS_TOKEN_TTL must be a valid duration: %w",
+			err,
+		)
+	}
+
+	refreshTokenTTL, err := time.ParseDuration(
+		getEnv("JWT_REFRESH_TOKEN_TTL", "168h"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"configuration error: JWT_REFRESH_TOKEN_TTL must be a valid duration: %w",
+			err,
+		)
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Name:        getEnv("APP_NAME", "streamix-api"),
@@ -64,6 +90,11 @@ func Load() (*Config, error) {
 			Password: dbPassword,
 			Name:     dbName,
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
+		},
+		Auth: AuthConfig{
+			JWTSecret:       jwtSecret,
+			AccessTokenTTL:  accessTokenTTL,
+			RefreshTokenTTL: refreshTokenTTL,
 		},
 	}
 

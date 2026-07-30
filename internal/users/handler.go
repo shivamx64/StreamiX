@@ -1,8 +1,6 @@
 package users
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	apphttp "github.com/shivamx64/streamix/internal/http"

@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 )
 
 // Config represents the application's runtime configuration.
@@ -14,6 +15,7 @@ type Config struct {
 	App      AppConfig
 	HTTP     HTTPConfig
 	Database DatabaseConfig
+	Auth	 AuthConfig
 }
 
 // AppConfig contains metatadata about the running application
@@ -60,4 +62,16 @@ type DatabaseConfig struct {
 	//   require
 	//   verify-full
 	SSLMode string
+}
+
+// AuthConfig contains authentication configuration.
+type AuthConfig struct {
+	// JWTSecret is used to sign and verify JWTs.
+	JWTSecret string
+
+	// AccessTokenTTL defines the lifetime of access tokens.
+	AccessTokenTTL time.Duration
+
+	// RefreshTokenTTL defines the lifetime of refresh tokens.
+	RefreshTokenTTL time.Duration
 }
