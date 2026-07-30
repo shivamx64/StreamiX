@@ -3,6 +3,7 @@ package container
 import (
 	"log/slog"
 
+	"github.com/shivamx64/streamix/internal/auth"
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/users"
 
@@ -14,6 +15,8 @@ type Container struct {
 	Logger *slog.Logger
 	DB     *gorm.DB
 
+	TokenManager *auth.TokenManager
+
 	UserHandler *users.Handler
 }
 
@@ -21,11 +24,14 @@ func New(
 	cfg *config.Config,
 	logger *slog.Logger,
 	db *gorm.DB,
+	tokenManager *auth.TokenManager,
 ) *Container {
+
 	userRepository := users.NewRepository(db)
 
 	userService := users.NewService(
 		userRepository,
+		tokenManager,
 	)
 
 	userHandler := users.NewHandler(
@@ -37,6 +43,7 @@ func New(
 		Logger: logger,
 		DB:     db,
 
-		UserHandler: userHandler,
+		TokenManager: tokenManager,
+		UserHandler:  userHandler,
 	}
 }

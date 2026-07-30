@@ -7,6 +7,7 @@ import (
 
 	"github.com/shivamx64/streamix/apps/api/internal/container"
 	"github.com/shivamx64/streamix/apps/api/internal/routes"
+	"github.com/shivamx64/streamix/internal/auth"
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/database"
 	"github.com/shivamx64/streamix/internal/logger"
@@ -32,7 +33,14 @@ func New() (*Application, error) {
 		return nil, fmt.Errorf("initialize database: %w", err)
 	}
 
-	c := container.New(cfg, log, db)
+	tokenManager := auth.NewTokenManager(cfg.Auth)
+
+	c := container.New(
+		cfg,
+		log,
+		db,
+		tokenManager,
+	)
 
 	router := gin.New()
 

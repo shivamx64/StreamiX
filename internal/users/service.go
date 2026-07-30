@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/shivamx64/streamix/internal/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -17,13 +18,18 @@ type Service interface {
 }
 
 type service struct {
-	repository Repository
+	repository   Repository
+	tokenManager *auth.TokenManager
 }
 
 // NewService creates a user service.
-func NewService(repository Repository) Service {
+func NewService(
+	repository Repository,
+	tokenManager *auth.TokenManager,
+) Service {
 	return &service{
-		repository: repository,
+		repository:   repository,
+		tokenManager: tokenManager,
 	}
 }
 
