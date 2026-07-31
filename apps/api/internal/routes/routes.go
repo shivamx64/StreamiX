@@ -49,5 +49,10 @@ func Register(router *gin.Engine, c *container.Container) {
 			"/register",
 			c.UserHandler.Register,
 		)
+
+		auth.POST(
+			"/login",
+			c.UserHandler.Login,
+		)
 	}
 }

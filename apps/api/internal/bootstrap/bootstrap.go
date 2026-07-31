@@ -33,6 +33,10 @@ func New() (*Application, error) {
 		return nil, fmt.Errorf("initialize database: %w", err)
 	}
 
+	if err := database.Migrate(db); err != nil {
+		return nil, fmt.Errorf("run database migrations: %w", err)
+	}
+
 	tokenManager := auth.NewTokenManager(cfg.Auth)
 
 	c := container.New(

@@ -54,11 +54,48 @@ func (h *Handler) Register(ctx *gin.Context) {
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 	}
-
 	apphttp.Created(
 		ctx,
 		"user registered successfully",
 		response,
 	)
+}
 
+// Login authenticates a user and returns JTW tokens.
+func (h *Handler) Login(ctx *gin.Context) {
+	
+	var request LoginRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		apphttp.BadRequest(
+			ctx,
+			"invalid request payload",
+		)
+		return
+	}
+
+	response, err := h.service.Login(
+		ctx.Request.Context(),
+		request.Email,
+		request.Password,
+	)
+
+	if err != nil {
+		switch err{
+		case ErrInvalidCredentials:
+			apphttp.Unauthorized(
+				ctx,
+				"invalid email or password",
+			)
+		default:
+			apphttp.InternalServerError(ctx)	
+		}
+		return
+	}
+
+	apphttp.Success(
+		ctx,
+		"login successful",
+		response,
+	)
 }
