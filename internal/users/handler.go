@@ -63,7 +63,7 @@ func (h *Handler) Register(ctx *gin.Context) {
 
 // Login authenticates a user and returns JTW tokens.
 func (h *Handler) Login(ctx *gin.Context) {
-	
+
 	var request LoginRequest
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -81,14 +81,14 @@ func (h *Handler) Login(ctx *gin.Context) {
 	)
 
 	if err != nil {
-		switch err{
+		switch err {
 		case ErrInvalidCredentials:
 			apphttp.Unauthorized(
 				ctx,
 				"invalid email or password",
 			)
 		default:
-			apphttp.InternalServerError(ctx)	
+			apphttp.InternalServerError(ctx)
 		}
 		return
 	}
