@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	apphttp "github.com/shivamx64/streamix/internal/http"
+	"github.com/shivamx64/streamix/internal/middleware"
 )
 
 // Handler handles user HTTP requests.
@@ -96,6 +97,42 @@ func (h *Handler) Login(ctx *gin.Context) {
 	apphttp.Success(
 		ctx,
 		"login successful",
+		response,
+	)
+}
+
+// Me returns the currently authenticated user.
+func (h *Handler) Me(ctx *gin.Context) {
+
+	userID, ok := middleware.UserID(ctx)
+
+	if !ok {
+		apphttp.Unauthorized(
+			ctx,
+			"authentication required",
+		)
+		return
+	}
+
+	user, err := h.service.Me(
+		ctx.Request.Context(),
+		userID,
+	)
+
+	if err != nil {
+		apphttp.InternalServerError(ctx)
+		return
+	}
+
+	response := UserResponse{
+		ID:		user.ID.String(),
+		Email: 	user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	apphttp.Success(
+		ctx,
+		"current user retrieved successfully",
 		response,
 	)
 }

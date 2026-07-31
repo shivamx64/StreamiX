@@ -9,7 +9,7 @@ const (
 )
 
 // Storing user ID
-func SetuserID(
+func SetUserID(
 	ctx *gin.Context,
 	userID string,
 ) {

@@ -21,6 +21,11 @@ type Service interface {
 		email string,
 		password string,
 	) (*LoginResponse, error)
+
+	Me(
+		ctx context.Context,
+		userID string,
+	) (*User, error)
 }
 
 type service struct {
@@ -128,4 +133,21 @@ func (s *service) Login(
 		TokenType:    "Bearer",
 		ExpiresIn:    s.tokenManager.AccessTokenExpiresIn(),
 	}, nil
+}
+
+// Me returns the currently authenticated user,
+func (s *service) Me(
+	ctx context.Context,
+	userID string,
+) (*User, error) {
+
+	user, err := s.repository.FindByID(
+		ctx,
+		userID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
