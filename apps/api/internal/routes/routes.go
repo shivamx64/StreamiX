@@ -17,6 +17,7 @@ type HealthResponse struct {
 
 // Register configures all HTTP routes for the application.
 func Register(router *gin.Engine, c *container.Container) {
+
 	// Register global middleware.
 	router.Use(
 		middleware.RequestID(),
@@ -27,6 +28,7 @@ func Register(router *gin.Engine, c *container.Container) {
 
 	// Health check endpoint.
 	router.GET("/health", func(ctx *gin.Context) {
+
 		apphttp.Success(
 			ctx,
 			"Service is healthy",
@@ -40,6 +42,17 @@ func Register(router *gin.Engine, c *container.Container) {
 
 	api := router.Group("/api/v1")
 
-	// Future feature modules will register their routes here.
-	_ = api
+	// Authentication routes.
+	auth := api.Group("/auth")
+	{
+		auth.POST(
+			"/register",
+			c.UserHandler.Register,
+		)
+
+		auth.POST(
+			"/login",
+			c.UserHandler.Login,
+		)
+	}
 }
