@@ -44,6 +44,7 @@ func Register(router *gin.Engine, c *container.Container) {
 
 	// Authentication routes.
 	auth := api.Group("/auth")
+	// Public authentication routes.
 	{
 		auth.POST(
 			"/register",
@@ -55,4 +56,15 @@ func Register(router *gin.Engine, c *container.Container) {
 			c.UserHandler.Login,
 		)
 	}
+
+	// Protected authentication routes.
+	protected := auth.Group("")
+	protected.Use(
+		middleware.Auth(c.TokenManager),
+	)
+
+	protected.GET(
+		"/me",
+		c.UserHandler.Me,
+	)
 }

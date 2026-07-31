@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -48,25 +47,34 @@ func (m *TokenManager) AccessTokenExpiresIn() int64 {
 }
 
 // ValidateToken validates a JWT and returns its claims.
-func (m *TokenManager) ValidateToken(tokenString string) (*Claims, error) {
+// ValidateAccessToken validates an access token and returns its claims.
+func (m *TokenManager) ValidateAccessToken(
+	tokenString string,
+) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(
 		tokenString,
 		&Claims{},
 		func(token *jwt.Token) (any, error) {
+
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+				return nil, ErrUnexpectedSigningAlg
 			}
+
 			return m.secret, nil
 		},
 	)
+
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidToken
 	}
+
 	claims, ok := token.Claims.(*Claims)
+
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, ErrInvalidToken
 	}
+
 	return claims, nil
 }
 
