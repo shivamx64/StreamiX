@@ -7,7 +7,7 @@ import (
 
 // File represents a stored object.
 type File struct {
-	key string
+	Key string
 	Size int64
 }
 

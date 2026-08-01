@@ -96,6 +96,10 @@ func Load() (*Config, error) {
 			AccessTokenTTL:  accessTokenTTL,
 			RefreshTokenTTL: refreshTokenTTL,
 		},
+		Storage: StorageConfig{
+			Driver:    getEnv("STORAGE_DRIVER", "local"),
+			LocalRoot: getEnv("LOCAL_STORAGE_ROOT", "storage"),
+		},
 	}
 
 	return cfg, nil

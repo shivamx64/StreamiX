@@ -11,6 +11,7 @@ import (
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/database"
 	"github.com/shivamx64/streamix/internal/logger"
+	"github.com/shivamx64/streamix/internal/storage"
 )
 
 type Application struct {
@@ -39,11 +40,16 @@ func New() (*Application, error) {
 
 	tokenManager := auth.NewTokenManager(cfg.Auth)
 
+	storageBackend := storage.NewLocalStorage(
+		cfg.Storage.LocalRoot,
+	)
+
 	c := container.New(
 		cfg,
 		log,
 		db,
 		tokenManager,
+		storageBackend,
 	)
 
 	router := gin.New()
