@@ -16,6 +16,7 @@ type Config struct {
 	HTTP     HTTPConfig
 	Database DatabaseConfig
 	Auth     AuthConfig
+	Storage  StorageConfig
 }
 
 // AppConfig contains metatadata about the running application
@@ -74,4 +75,10 @@ type AuthConfig struct {
 
 	// RefreshTokenTTL defines the lifetime of refresh tokens.
 	RefreshTokenTTL time.Duration
+}
+
+// StorageConfig contains object storage configuration.
+type StorageConfig struct {
+	Driver    string
+	LocalRoot string
 }

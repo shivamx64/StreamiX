@@ -5,6 +5,7 @@ import (
 
 	"github.com/shivamx64/streamix/internal/auth"
 	"github.com/shivamx64/streamix/internal/config"
+	"github.com/shivamx64/streamix/internal/storage"
 	"github.com/shivamx64/streamix/internal/users"
 
 	"gorm.io/gorm"
@@ -17,6 +18,8 @@ type Container struct {
 
 	TokenManager *auth.TokenManager
 
+	Storage storage.Storage
+
 	UserHandler *users.Handler
 }
 
@@ -25,6 +28,7 @@ func New(
 	logger *slog.Logger,
 	db *gorm.DB,
 	tokenManager *auth.TokenManager,
+	storageBackend storage.Storage,
 ) *Container {
 
 	userRepository := users.NewRepository(db)
@@ -44,6 +48,8 @@ func New(
 		DB:     db,
 
 		TokenManager: tokenManager,
-		UserHandler:  userHandler,
+		Storage:      storageBackend,
+
+		UserHandler: userHandler,
 	}
 }
