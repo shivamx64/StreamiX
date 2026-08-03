@@ -3,7 +3,9 @@ import Link from "next/link";
 
 import { MarketingSection } from "@/components/shared-ui/marketing/marketing-section";
 import { MarketingSectionHeader } from "@/components/shared-ui/marketing/marketing-section-header";
+import { Reveal } from "@/components/shared-ui/reveal";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/class-name";
 
 type Plan = {
@@ -77,76 +79,77 @@ export function PricingSection() {
       />
 
       <div className="mt-16 grid gap-6 lg:grid-cols-3">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={cn(
-              "relative flex flex-col rounded-3xl border bg-card p-8 shadow-sm transition hover:-translate-y-1 hover:shadow-md",
-              plan.highlighted
-                ? "border-primary/40 ring-1 ring-primary/40"
-                : "border-border",
-            )}
-          >
-            {plan.highlighted && (
-              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm">
-                Most Popular
-              </span>
-            )}
-
-            <h3 className="text-base font-semibold text-foreground">
-              {plan.name}
-            </h3>
-
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-bold tracking-tight text-foreground">
-                {plan.price}
-              </span>
-              {plan.period && (
-                <span className="text-sm text-muted-foreground">
-                  {plan.period}
+        {plans.map((plan, index) => (
+          <Reveal key={plan.name} delay={index * 0.08} className="h-full">
+            <Card
+              className={cn(
+                "relative flex h-full flex-col p-8 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5",
+                plan.highlighted
+                  ? "border-primary/50 ring-1 ring-primary/30 shadow-lg shadow-primary/10 lg:scale-[1.03]"
+                  : "hover:border-border",
+              )}
+            >
+              {plan.highlighted && (
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm">
+                  Most Popular
                 </span>
               )}
-            </div>
 
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              {plan.description}
-            </p>
+              <h3 className="text-base font-semibold text-foreground">
+                {plan.name}
+              </h3>
 
-            <ul className="mt-8 flex-1 space-y-3">
-              {plan.features.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-3 text-sm text-foreground"
-                >
-                  <span
-                    className={cn(
-                      "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-                      plan.highlighted
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-accent text-primary",
-                    )}
-                  >
-                    <Check className="h-3 w-3" strokeWidth={3} />
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-bold tracking-tight text-foreground">
+                  {plan.price}
+                </span>
+                {plan.period && (
+                  <span className="text-sm text-muted-foreground">
+                    {plan.period}
                   </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
+                )}
+              </div>
 
-            <Button
-              asChild
-              variant={plan.cta.variant}
-              className="mt-8 w-full"
-            >
-              <Link href={plan.cta.href}>
-                {plan.cta.label}
-              </Link>
-            </Button>
-          </div>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                {plan.description}
+              </p>
+
+              <ul className="mt-8 flex-1 space-y-3">
+                {plan.features.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex items-start gap-3 text-sm text-foreground"
+                  >
+                    <span
+                      className={cn(
+                        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+                        plan.highlighted
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-primary/10 text-primary",
+                      )}
+                    >
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <Button
+                asChild
+                variant={plan.cta.variant}
+                className="mt-8 w-full"
+              >
+                <Link href={plan.cta.href}>
+                  {plan.cta.label}
+                </Link>
+              </Button>
+            </Card>
+          </Reveal>
         ))}
       </div>
 
-      <p className="mt-10 text-center text-sm text-muted-foreground">
+      <p className="mt-12 text-center text-sm text-muted-foreground">
         All plans include HLS streaming, thumbnail generation, and 24/7
         infrastructure monitoring.
       </p>

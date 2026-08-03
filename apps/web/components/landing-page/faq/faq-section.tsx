@@ -61,13 +61,15 @@ export function FaqSection() {
               key={faq.question}
               className={cn(
                 "overflow-hidden rounded-2xl border bg-card transition",
-                open ? "border-primary/30" : "border-border",
+                open ? "border-primary/30 shadow-sm" : "border-border",
               )}
             >
               <button
                 type="button"
+                id={`faq-button-${index}`}
                 onClick={() => setOpenIndex(open ? null : index)}
                 aria-expanded={open}
+                aria-controls={`faq-panel-${index}`}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
                 <span className="text-base font-semibold text-foreground">
@@ -84,6 +86,9 @@ export function FaqSection() {
               <AnimatePresence initial={false}>
                 {open && (
                   <motion.div
+                    id={`faq-panel-${index}`}
+                    role="region"
+                    aria-labelledby={`faq-button-${index}`}
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
