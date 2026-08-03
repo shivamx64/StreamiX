@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-// import { ApplicationFooter } from "@/components/landing-page/footer/application-footer";
+import { ApplicationFooter } from "@/components/landing-page/footer/application-footer";
 import { ApplicationNavigationBar } from "@/components/navigation/application-navigation-bar";
 
 type MarketingLayoutProps = {
@@ -16,7 +16,7 @@ export default function MarketingLayout({
       <main>
         {children}
       </main>
-      {/* <ApplicationFooter /> */}
+      <ApplicationFooter />
     </>
   );
 }

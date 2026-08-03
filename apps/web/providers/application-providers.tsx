@@ -1,5 +1,6 @@
 "use client"
 
+import { MotionConfig } from "framer-motion"
 import { ReactNode } from "react"
 
 import { ThemeProvider } from "./theme-provider"
@@ -14,9 +15,11 @@ export function ApplicationProviders({
 }: Props) {
 	return (
 		<ThemeProvider>
-			<ApplicationQueryProvider>
-				{children}
-			</ApplicationQueryProvider>
+			<MotionConfig reducedMotion="user">
+				<ApplicationQueryProvider>
+					{children}
+				</ApplicationQueryProvider>
+			</MotionConfig>
 		</ThemeProvider>
 	)
 }

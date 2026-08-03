@@ -33,7 +33,12 @@ export function MarketingSectionHeader({
         </MarketingSectionBadge>
       )}
 
-      <h2 className="mt-6 max-w-2xl text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+      <h2
+        className={cn(
+          "max-w-2xl text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl",
+          badge && "mt-6",
+        )}
+      >
         {title}
       </h2>
 

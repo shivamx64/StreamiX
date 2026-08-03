@@ -1,28 +1,51 @@
 @import "tailwindcss";
 
 :root {
-	--background: #faf9f6;
-	--foreground: #1c1917;
+	--background: #0c0a09;
+	--foreground: #fafaf9;
 
-	--card: #ffffff;
-	--card-foreground: #1c1917;
+	--card: #1a1614;
+	--card-foreground: #fafaf9;
 
-	--primary: #ea580c;
+	--primary: #c2410c;
 	--primary-foreground: #ffffff;
 
-	--secondary: #ffedd5;
-	--secondary-foreground: #9a3412;
+	--secondary: #292321;
+	--secondary-foreground: #fdba74;
 
-	--muted: #f5f4f0;
-	--muted-foreground: #78716c;
+	--muted: #1c1917;
+	--muted-foreground: #a8a29e;
 
-	--accent: #fff7ed;
-	--accent-foreground: #c2410c;
+	--accent: #1c1917;
+	--accent-foreground: #fdba74;
 
-	--border: #e7e5e4;
-	--ring: #ea580c;
+	--border: #292524;
+	--ring: #c2410c;
 
 	--radius: 0.625rem;
+}
+
+.dark {
+	--background: #0c0a09;
+	--foreground: #fafaf9;
+
+	--card: #1a1614;
+	--card-foreground: #fafaf9;
+
+	--primary: #c2410c;
+	--primary-foreground: #ffffff;
+
+	--secondary: #292321;
+	--secondary-foreground: #fdba74;
+
+	--muted: #1c1917;
+	--muted-foreground: #a8a29e;
+
+	--accent: #1c1917;
+	--accent-foreground: #fdba74;
+
+	--border: #292524;
+	--ring: #c2410c;
 }
 
 @theme inline {
@@ -77,9 +100,28 @@
 	::selection {
 		background-color: color-mix(
 			in srgb,
-			var(--primary) 18%,
+			var(--primary) 25%,
 			transparent
 		);
 		color: var(--foreground);
+	}
+}
+
+@layer utilities {
+	.text-gradient {
+		background-image: linear-gradient(
+			to right,
+			var(--color-primary),
+			#fb923c
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
 	}
 }

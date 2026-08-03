@@ -12,7 +12,7 @@ export function MarketingSectionDescription({
   return (
     <p
       className={cn(
-        "mt-8 max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl",
+        "max-w-2xl text-lg leading-8 text-muted-foreground md:text-xl",
         className,
       )}
     >
