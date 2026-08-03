@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/shivamx64/streamix/internal/auth"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -74,6 +75,7 @@ func (s *service) Register(
 	}
 
 	user := &User{
+		ID:           uuid.New(),
 		Email:        email,
 		PasswordHash: string(passwordHash),
 	}

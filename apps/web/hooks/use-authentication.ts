@@ -27,7 +27,10 @@ function readStoredTokens(): TokenState {
 
 function readApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
-    const message = (error.response?.data as { message?: string })?.message;
+    const payload = error.response?.data as
+      | { error?: { message?: string } }
+      | undefined;
+    const message = payload?.error?.message;
     if (message) return message;
   }
 
@@ -74,7 +77,11 @@ export function useAuthentication() {
       setError(null);
 
       try {
-        const result = await authenticationService.register(request);
+        await authenticationService.register(request);
+        const result = await authenticationService.login({
+          email: request.email,
+          password: request.password,
+        });
         persistTokens(result);
         return true;
       } catch (caught) {

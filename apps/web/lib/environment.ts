@@ -5,18 +5,9 @@
  * of reading process.env directly.
  */
 
-function requireEnvironmentVariable(name: string): string{
-    const value = process.env[name]
-
-    if(!value) {
-        throw new Error(`Missing required environment variable: ${name}`)
-    }
-
-    return value
-}
+const DEFAULT_API_BASE_URL = "http://localhost:8080/api/v1";
 
 export const environment = {
-    apiBaseUrl: requireEnvironmentVariable (
-        "NEXT_PUBLIC_API_BASE_URL"
-    ),
+    apiBaseUrl:
+        process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL,
 }
