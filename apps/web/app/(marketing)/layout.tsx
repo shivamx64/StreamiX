@@ -1,22 +1,22 @@
 import type { ReactNode } from "react";
 
-import { ApplicationFooter } from "@/components/footer/application-footer";
+// import { ApplicationFooter } from "@/components/landing-page/footer/application-footer";
 import { ApplicationNavigationBar } from "@/components/navigation/application-navigation-bar";
 
 type MarketingLayoutProps = {
-	children: ReactNode;
+  children: ReactNode;
 };
 
 export default function MarketingLayout({
-	children,
+  children,
 }: MarketingLayoutProps) {
-	return (
-		<>
-			<ApplicationNavigationBar />
-
-			<main>{children}</main>
-
-			<ApplicationFooter />
-		</>
-	);
+  return (
+    <>
+      <ApplicationNavigationBar />
+      <main>
+        {children}
+      </main>
+      {/* <ApplicationFooter /> */}
+    </>
+  );
 }
