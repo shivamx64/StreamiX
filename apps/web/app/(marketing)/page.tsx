@@ -1,3 +1,9 @@
-export default function MarketingHomePage() {
-	return <div />;
+import { HeroSection } from "@/components/landing-page/hero/hero-section";
+
+export default function LandingPage() {
+  return (
+    <>
+      <HeroSection />
+    </>
+  );
 }
