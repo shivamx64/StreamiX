@@ -26,10 +26,10 @@ export function HeroDashboardPreview() {
     <div className="relative mx-auto w-full max-w-5xl">
       <div
         aria-hidden="true"
-        className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-r from-primary/20 to-orange-400/15 blur-2xl"
+        className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-gradient-to-r from-primary/10 to-orange-400/10 blur-2xl"
       />
 
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-black/40">
+      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-xl shadow-foreground/5">
         {/* Window chrome */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -86,7 +86,7 @@ export function HeroDashboardPreview() {
           </div>
 
           {/* Generated outputs */}
-          <div className="rounded-2xl border border-border bg-white/[0.03] p-5 md:col-span-2">
+          <div className="rounded-2xl border border-border bg-muted/40 p-5 md:col-span-2">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold text-foreground">
                 Generated Outputs

@@ -18,6 +18,7 @@ export function MobileNavigationSheet() {
 	useEffect(() => {
 		if (!open) return;
 
+		const trigger = triggerRef.current;
 		const previousOverflow = document.body.style.overflow;
 		document.body.style.overflow = "hidden";
 		closeButtonRef.current?.focus();
@@ -33,7 +34,7 @@ export function MobileNavigationSheet() {
 		return () => {
 			document.body.style.overflow = previousOverflow;
 			document.removeEventListener("keydown", handleKeyDown);
-			triggerRef.current?.focus();
+			trigger?.focus();
 		};
 	}, [open]);
 

@@ -23,13 +23,13 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   default:
-    "bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90",
+    "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
 
   secondary:
     "bg-secondary text-secondary-foreground hover:bg-secondary/80",
 
   outline:
-    "border border-border bg-background/60 hover:bg-accent hover:text-accent-foreground",
+    "border border-border bg-background hover:bg-accent hover:text-accent-foreground",
 
   ghost:
     "hover:bg-accent hover:text-accent-foreground",
@@ -58,7 +58,7 @@ export function Button({
   return (
     <Component
       className={cn(
-        "inline-flex items-center justify-center rounded-xl font-medium transition active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center rounded-xl font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
         variantClasses[variant],
         sizeClasses[size],
         className,

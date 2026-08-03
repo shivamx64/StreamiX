@@ -1,8 +1,10 @@
 import { MarketingBackgroundGradient } from "@/components/shared-ui/marketing/marketing-background-gradient";
 import { MarketingBackgroundGrid } from "@/components/shared-ui/marketing/marketing-background-grid";
+import { Reveal } from "@/components/shared-ui/reveal";
 
 import { HeroContent } from "./hero-content";
 import { HeroDashboardPreview } from "./hero-dashboard-preview";
+import { HeroSocialProof } from "./hero-social-proof";
 
 export function HeroSection() {
   return (
@@ -14,9 +16,13 @@ export function HeroSection() {
         <div className="flex flex-col items-center">
           <HeroContent />
 
-          <div className="mt-16 w-full md:mt-20">
+          <Reveal delay={0.2} className="mt-16 w-full md:mt-20">
             <HeroDashboardPreview />
-          </div>
+          </Reveal>
+
+          <Reveal delay={0.25} className="w-full">
+            <HeroSocialProof />
+          </Reveal>
         </div>
       </div>
     </section>
