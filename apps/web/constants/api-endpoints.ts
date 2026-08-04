@@ -6,7 +6,7 @@ export const apiEndpoints = {
 	},
 
 	users: {
-		me: "/users/me",
+		me: "/auth/me",
 	},
 
 	videos: {

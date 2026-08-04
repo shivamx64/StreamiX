@@ -3,6 +3,7 @@
 import { MotionConfig } from "framer-motion"
 import { ReactNode } from "react"
 
+import { AuthenticationProvider } from "./authentication-provider"
 import { ApplicationQueryProvider } from "./query-client-provider"
 
 type Props = {
@@ -15,7 +16,9 @@ export function ApplicationProviders({
 	return (
 		<MotionConfig reducedMotion="user">
 			<ApplicationQueryProvider>
-				{children}
+				<AuthenticationProvider>
+					{children}
+				</AuthenticationProvider>
 			</ApplicationQueryProvider>
 		</MotionConfig>
 	)

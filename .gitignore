@@ -2,3 +2,8 @@
 .env.local
 .env.example
 
+# go build artifacts
+/apps/api/api
+/apps/worker/worker
+*.exe
+

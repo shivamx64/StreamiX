@@ -31,7 +31,7 @@ export default function LoginPage() {
     const success = await login(values);
 
     if (success) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   });
 
