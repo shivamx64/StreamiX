@@ -39,13 +39,13 @@ export function StatusBreakdown({
         <h3 className="text-sm font-semibold text-foreground">
           Processing status
         </h3>
-        <span className="text-xs text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           {total} total
         </span>
       </div>
 
       <div
-        className="mt-5 flex h-2.5 w-full gap-px overflow-hidden rounded-full"
+        className="mt-5 flex h-2 w-full gap-px"
         role="img"
         aria-label={`Status distribution: ${visible
           .map((s) => `${counts[s]} ${statusLabels[s].toLowerCase()}`)
@@ -72,13 +72,13 @@ export function StatusBreakdown({
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
               <span
                 className={cn(
-                  "h-2.5 w-2.5 shrink-0 rounded-full",
+                  "h-2 w-2 shrink-0",
                   statusBarClasses[status],
                 )}
               />
               {statusLabels[status]}
             </span>
-            <span className="text-sm font-semibold text-foreground">
+            <span className="font-mono text-sm font-semibold text-foreground">
               {counts[status]}
             </span>
           </li>

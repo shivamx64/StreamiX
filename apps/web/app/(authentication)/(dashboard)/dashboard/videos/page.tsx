@@ -15,7 +15,7 @@ export default function VideoLibraryPage() {
     <div className="space-y-8">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
             Video library
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">

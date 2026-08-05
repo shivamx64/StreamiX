@@ -9,8 +9,8 @@ import {
   UploadCloud,
 } from "lucide-react";
 
+import { MetricStrip } from "@/components/dashboard/metric-strip";
 import { RecentUploads } from "@/components/dashboard/recent-uploads";
-import { StatCard } from "@/components/dashboard/stat-card";
 import { StatusBreakdown } from "@/components/dashboard/status-breakdown";
 import { VideoLibrary } from "@/components/dashboard/video-library";
 import { Button } from "@/components/ui/button";
@@ -57,7 +57,7 @@ export default function DashboardHomePage() {
     <div className="space-y-8">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
             Welcome back{name ? `, ${name}` : ""}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -84,53 +84,56 @@ export default function DashboardHomePage() {
       </section>
 
       {isLoading && (
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-28 animate-pulse rounded-3xl border border-border bg-muted"
-            />
-          ))}
+        <section>
+          <Card className="grid grid-cols-1 divide-y divide-border/60 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="space-y-3 p-5">
+                <div className="h-3.5 w-24 animate-pulse rounded-md bg-muted" />
+                <div className="h-8 w-16 animate-pulse rounded-md bg-muted" />
+                <div className="h-3 w-32 animate-pulse rounded-md bg-muted" />
+              </div>
+            ))}
+          </Card>
         </section>
       )}
 
       {!isLoading && !isEmpty && !isError && (
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="Total videos"
-            value={String(videos.length)}
-            icon={Clapperboard}
-          />
-          <StatCard
-            label="Completed"
-            value={String(stats.completed)}
-            sublabel={
-              stats.completed > 0
-                ? `${Math.round((stats.completed / videos.length) * 100)}% of library`
-                : undefined
-            }
-            icon={CheckCircle2}
-            tone="success"
-          />
-          <StatCard
-            label="Processing now"
-            value={String(stats.inProgress)}
-            sublabel={
-              stats.inProgress > 0
-                ? "Transcoding in the background"
-                : "Queue is idle"
-            }
-            icon={UploadCloud}
-            tone="info"
-          />
-          <StatCard
-            label="Storage used"
-            value={formatBytes(stats.storage)}
-            sublabel={`Across ${videos.length} file${videos.length === 1 ? "" : "s"}`}
-            icon={HardDrive}
-            tone="warning"
-          />
-        </section>
+        <MetricStrip
+          metrics={[
+            {
+              label: "Total videos",
+              value: String(videos.length),
+              icon: Clapperboard,
+            },
+            {
+              label: "Completed",
+              value: String(stats.completed),
+              sublabel:
+                stats.completed > 0
+                  ? `${Math.round((stats.completed / videos.length) * 100)}% of library`
+                  : undefined,
+              icon: CheckCircle2,
+              tone: "success",
+            },
+            {
+              label: "Processing now",
+              value: String(stats.inProgress),
+              sublabel:
+                stats.inProgress > 0
+                  ? "Transcoding in the background"
+                  : "Queue is idle",
+              icon: UploadCloud,
+              tone: "info",
+            },
+            {
+              label: "Storage used",
+              value: formatBytes(stats.storage),
+              sublabel: `Across ${videos.length} file${videos.length === 1 ? "" : "s"}`,
+              icon: HardDrive,
+              tone: "warning",
+            },
+          ]}
+        />
       )}
 
       {!isLoading && !isEmpty && !isError && (
@@ -147,9 +150,12 @@ export default function DashboardHomePage() {
       {!isLoading && !isEmpty && (
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="font-display text-base font-semibold tracking-tight text-foreground">
               Video library
             </h2>
+            <span className="font-mono text-xs text-muted-foreground">
+              {videos.length} video{videos.length === 1 ? "" : "s"}
+            </span>
           </div>
 
           <VideoLibrary
@@ -166,11 +172,11 @@ export default function DashboardHomePage() {
 function EmptyDashboardHero() {
   return (
     <Card className="flex flex-col items-center px-6 py-16 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-        <UploadCloud className="h-8 w-8" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-accent text-accent-foreground">
+        <UploadCloud className="h-6 w-6" />
       </div>
 
-      <h2 className="mt-6 text-xl font-semibold text-foreground">
+      <h2 className="mt-6 font-display text-2xl font-semibold tracking-tight text-foreground">
         Upload your first video
       </h2>
 
@@ -182,19 +188,19 @@ function EmptyDashboardHero() {
 
       <ol className="mt-6 flex flex-col gap-2 text-left text-sm text-muted-foreground sm:flex-row sm:gap-6">
         <li className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground">
+          <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-accent text-[11px] font-bold text-accent-foreground">
             1
           </span>
           Upload your video
         </li>
         <li className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground">
+          <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-accent text-[11px] font-bold text-accent-foreground">
             2
           </span>
           We transcode it
         </li>
         <li className="flex items-center gap-2">
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-accent-foreground">
+          <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-accent text-[11px] font-bold text-accent-foreground">
             3
           </span>
           Stream anywhere

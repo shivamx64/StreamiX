@@ -13,7 +13,7 @@ export function ApplicationHeading({
 	return (
 		<h1
 			className={cn(
-				"font-serif text-6xl leading-none tracking-tight text-neutral-900 lg:text-8xl",
+				"font-display text-6xl leading-none tracking-tight text-neutral-900 lg:text-8xl",
 				className,
 			)}
 			{...props}

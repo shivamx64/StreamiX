@@ -74,7 +74,7 @@ export default function VideoUploadPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
           Upload a video
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">

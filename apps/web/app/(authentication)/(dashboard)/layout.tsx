@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BookOpen,
   Clapperboard,
+  HardDrive,
   LayoutDashboard,
   LogOut,
   Upload,
@@ -12,25 +14,55 @@ import {
 
 import { useAuthenticationContext } from "@/providers/authentication-provider";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { useVideos } from "@/hooks/use-video-processing";
 import { cn } from "@/lib/class-name";
+import { formatBytes } from "@/lib/format";
 import { ApplicationContainer } from "@/components/ui/application-container";
 import { Button } from "@/components/ui/button";
 
-const dashboardNavigationItems = [
+type NavigationItem = {
+  label: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  external?: boolean;
+};
+
+type NavigationSection = {
+  label: string;
+  items: NavigationItem[];
+};
+
+const navigationSections: NavigationSection[] = [
   {
-    label: "Overview",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    label: "General",
+    items: [
+      {
+        label: "Overview",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        label: "Upload",
+        href: "/dashboard/upload",
+        icon: Upload,
+      },
+    ],
   },
   {
-    label: "Upload",
-    href: "/dashboard/upload",
-    icon: Upload,
-  },
-  {
-    label: "Video library",
-    href: "/dashboard/videos",
-    icon: Video,
+    label: "Library",
+    items: [
+      {
+        label: "Video library",
+        href: "/dashboard/videos",
+        icon: Video,
+      },
+      {
+        label: "Documentation",
+        href: "/docs",
+        icon: BookOpen,
+        external: true,
+      },
+    ],
   },
 ];
 
@@ -52,21 +84,33 @@ function userInitials(email?: string): string {
   return initials || "U";
 }
 
+function isItemActive(item: NavigationItem, pathname: string): boolean {
+  return item.href === "/dashboard"
+    ? pathname === "/dashboard"
+    : pathname.startsWith(item.href);
+}
+
 function DashboardNavigation() {
   const pathname = usePathname();
   const { logout } = useAuthenticationContext();
   const { data: user } = useUserProfile();
+  const { data: videos } = useVideos();
+
+  const videoCount = videos?.length ?? 0;
+  const storageUsed = formatBytes(
+    videos?.reduce((sum, video) => sum + video.size, 0) ?? 0,
+  );
 
   return (
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-muted/30 lg:flex">
       <div className="flex h-16 items-center gap-2.5 border-b border-border/60 px-6">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Clapperboard className="h-5 w-5" />
+        <span className="flex h-8 w-8 items-center justify-center rounded-none bg-primary text-primary-foreground">
+          <Clapperboard className="h-4.5 w-4.5" />
         </span>
 
         <Link
           href="/dashboard"
-          className="text-lg font-bold tracking-tight text-foreground"
+          className="font-display text-base font-semibold tracking-tight text-foreground"
         >
           StreamiX
         </Link>
@@ -74,53 +118,87 @@ function DashboardNavigation() {
 
       <nav
         aria-label="Dashboard navigation"
-        className="flex-1 space-y-1 p-4"
+        className="flex-1 overflow-y-auto pb-4"
       >
-        {dashboardNavigationItems.map((item) => {
-          const isActive =
-            item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href);
+        {navigationSections.map((section) => (
+          <div key={section.label}>
+            <p className="px-5 pb-2 pt-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              {section.label}
+            </p>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground",
-                isActive &&
-                  "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const isActive = isItemActive(item, pathname);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className={cn(
+                      "flex items-center gap-3 border-l-2 py-2 pl-[14px] pr-4 text-sm font-medium transition-colors",
+                      isActive
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="border-t border-border/60 p-4">
-        <div className="flex items-center gap-3 px-1.5 py-2">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
-            {userInitials(user?.email)}
-          </span>
+      <div className="border-t border-border/60 px-4 py-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              <Video className="h-3.5 w-3.5" />
+              Videos
+            </span>
+            <span className="font-mono text-sm font-semibold text-foreground">
+              {videoCount}
+            </span>
+          </div>
 
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">
-              {user?.email ?? "Account"}
-            </p>
-            <p className="text-xs text-muted-foreground">Free plan</p>
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+              <HardDrive className="h-3.5 w-3.5" />
+              Storage
+            </span>
+            <span className="font-mono text-sm font-semibold text-foreground">
+              {storageUsed}
+            </span>
           </div>
         </div>
 
-        <Button
-          variant="ghost"
-          className="mt-1 w-full justify-start gap-3 text-muted-foreground"
-          onClick={logout}
-        >
-          <LogOut className="h-4 w-4" />
-          Log out
-        </Button>
+        <div className="mt-4 border-t border-border/60 pt-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none border border-border bg-accent text-xs font-bold text-accent-foreground">
+              {userInitials(user?.email)}
+            </span>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">
+                {user?.email ?? "Account"}
+              </p>
+              <p className="text-xs text-muted-foreground">Free plan</p>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            className="mt-2 w-full justify-start gap-3 rounded-md text-muted-foreground"
+            onClick={logout}
+          >
+            <LogOut className="h-4 w-4" />
+            Log out
+          </Button>
+        </div>
       </div>
     </aside>
   );
@@ -128,18 +206,26 @@ function DashboardNavigation() {
 
 function DashboardMobileNavigation() {
   const { logout } = useAuthenticationContext();
+  const pathname = usePathname();
 
   return (
     <div className="flex items-center gap-1 lg:hidden">
-      {dashboardNavigationItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
-        >
-          {item.label}
-        </Link>
-      ))}
+      {navigationSections
+        .flatMap((section) => section.items)
+        .filter((item) => !item.external)
+        .map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground",
+              isItemActive(item, pathname) &&
+                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+            )}
+          >
+            {item.label}
+          </Link>
+        ))}
 
       <Button
         variant="ghost"
@@ -181,7 +267,7 @@ export default function DashboardLayout({
             <div className="flex h-16 items-center justify-between lg:h-16">
               <Link
                 href="/dashboard"
-                className="text-lg font-bold tracking-tight text-foreground lg:hidden"
+                className="font-display text-base font-semibold tracking-tight text-foreground lg:hidden"
               >
                 StreamiX
               </Link>

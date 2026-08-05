@@ -1,12 +1,9 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Video as VideoIcon,
-} from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
-import { formatBytes, formatRelativeTime } from "@/lib/format";
-import { statusIconClasses } from "@/lib/video-status";
+import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { formatRelativeTime } from "@/lib/format";
 import type { Video } from "@/types/video-types";
 
 import { VideoStatusBadge } from "./video-status-badge";
@@ -27,8 +24,8 @@ export function RecentUploads({ videos }: RecentUploadsProps) {
   if (recent.length === 0) return null;
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between">
+    <Card className="overflow-hidden">
+      <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
         <h3 className="text-sm font-semibold text-foreground">
           Recent uploads
         </h3>
@@ -42,34 +39,54 @@ export function RecentUploads({ videos }: RecentUploadsProps) {
         </Link>
       </div>
 
-      <ul className="mt-3 divide-y divide-border/60">
-        {recent.map((video) => (
-          <li key={video.id}>
-            <Link
-              href={`/dashboard/videos/${video.id}`}
-              className="flex items-center gap-3 rounded-xl px-2 py-3 transition hover:bg-accent/60"
-            >
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${statusIconClasses[video.status]}`}
-              >
-                <VideoIcon className="h-4.5 w-4.5" />
-              </div>
+      <Table>
+        <THead>
+          <TR className="border-0 hover:bg-transparent">
+            <TH>File</TH>
+            <TH>Status</TH>
+            <TH className="hidden sm:table-cell">Uploaded</TH>
+            <TH className="w-10" aria-label="Open" />
+          </TR>
+        </THead>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">
+        <TBody>
+          {recent.map((video) => (
+            <TR key={video.id}>
+              <TD className="max-w-0">
+                <p className="truncate font-medium text-foreground">
                   {video.original_filename}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {formatBytes(video.size)} ·{" "}
-                  {formatRelativeTime(video.created_at)}
+                <p className="truncate text-xs text-muted-foreground">
+                  {video.mime_type}
                 </p>
-              </div>
+              </TD>
 
-              <VideoStatusBadge status={video.status} />
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <TD>
+                <VideoStatusBadge status={video.status} />
+              </TD>
+
+              <TD className="hidden whitespace-nowrap text-sm text-muted-foreground sm:table-cell">
+                <time
+                  dateTime={video.created_at}
+                  title={new Date(video.created_at).toLocaleString()}
+                >
+                  {formatRelativeTime(video.created_at)}
+                </time>
+              </TD>
+
+              <TD>
+                <Link
+                  href={`/dashboard/videos/${video.id}`}
+                  aria-label={`Open ${video.original_filename}`}
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </TD>
+            </TR>
+          ))}
+        </TBody>
+      </Table>
     </Card>
   );
 }
