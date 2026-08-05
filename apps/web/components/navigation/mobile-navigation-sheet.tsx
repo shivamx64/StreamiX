@@ -47,7 +47,7 @@ export function MobileNavigationSheet() {
 				aria-label="Open navigation menu"
 				aria-expanded={open}
 				aria-controls="mobile-navigation-menu"
-				className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground md:hidden"
+				className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground md:hidden"
 			>
 				<Menu className="h-5 w-5" />
 			</button>
@@ -85,7 +85,7 @@ export function MobileNavigationSheet() {
 									type="button"
 									onClick={() => setOpen(false)}
 									aria-label="Close navigation menu"
-									className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground"
+									className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-foreground"
 								>
 									<X className="h-5 w-5" />
 								</button>
@@ -100,7 +100,7 @@ export function MobileNavigationSheet() {
 										key={item.href}
 										href={item.href}
 										onClick={() => setOpen(false)}
-										className="rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-accent hover:text-accent-foreground"
+										className="rounded-md px-4 py-3 text-base font-medium text-foreground transition hover:bg-accent hover:text-accent-foreground"
 									>
 										{item.label}
 									</Link>

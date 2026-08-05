@@ -83,14 +83,14 @@ export function PricingSection() {
           <Reveal key={plan.name} delay={index * 0.08} className="h-full">
             <Card
               className={cn(
-                "relative flex h-full flex-col p-8 transition hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5",
+                "relative flex h-full flex-col p-8 transition-shadow",
                 plan.highlighted
-                  ? "border-primary/50 ring-1 ring-primary/30 shadow-lg shadow-primary/10 lg:scale-[1.03]"
-                  : "hover:border-border",
+                  ? "border-primary/40 shadow-xl shadow-primary/10 ring-1 ring-primary/20"
+                  : "hover:shadow-md hover:shadow-foreground/5",
               )}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm">
+                <span className="absolute -top-3 left-8 rounded-md bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-sm">
                   Most Popular
                 </span>
               )}
@@ -100,7 +100,7 @@ export function PricingSection() {
               </h3>
 
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight text-foreground">
+                <span className="font-display text-4xl font-semibold tracking-tight text-foreground">
                   {plan.price}
                 </span>
                 {plan.period && (
@@ -122,7 +122,7 @@ export function PricingSection() {
                   >
                     <span
                       className={cn(
-                        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+                        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm",
                         plan.highlighted
                           ? "bg-primary text-primary-foreground"
                           : "bg-primary/10 text-primary",

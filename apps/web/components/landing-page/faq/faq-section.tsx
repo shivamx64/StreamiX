@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { MarketingSection } from "@/components/shared-ui/marketing/marketing-section";
@@ -43,6 +43,7 @@ const faqs = [
 
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const reduceMotion = useReducedMotion();
 
   return (
     <MarketingSection id="faq" className="bg-muted/40">
@@ -52,35 +53,41 @@ export function FaqSection() {
         description="Everything you need to know about the platform. Can't find an answer? Reach out and we'll help."
       />
 
-      <div className="mx-auto mt-16 max-w-3xl space-y-3">
+      <div className="mx-auto mt-16 max-w-3xl border-t border-border/70">
         {faqs.map((faq, index) => {
           const open = openIndex === index;
 
           return (
-            <div
-              key={faq.question}
-              className={cn(
-                "overflow-hidden rounded-2xl border bg-card transition",
-                open ? "border-primary/30 shadow-sm" : "border-border",
-              )}
-            >
+            <div key={faq.question} className="border-b border-border/70">
               <button
                 type="button"
                 id={`faq-button-${index}`}
                 onClick={() => setOpenIndex(open ? null : index)}
                 aria-expanded={open}
                 aria-controls={`faq-panel-${index}`}
-                className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                className="flex w-full items-center justify-between gap-4 py-5 text-left"
               >
-                <span className="text-base font-semibold text-foreground">
+                <span
+                  className={cn(
+                    "text-base font-medium transition-colors",
+                    open ? "text-primary" : "text-foreground",
+                  )}
+                >
                   {faq.question}
                 </span>
-                <ChevronDown
-                  className={cn(
-                    "h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200",
-                    open && "rotate-180 text-primary",
-                  )}
-                />
+
+                <motion.span
+                  animate={{ rotate: open ? 45 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="shrink-0"
+                >
+                  <Plus
+                    className={cn(
+                      "h-5 w-5",
+                      open ? "text-primary" : "text-muted-foreground",
+                    )}
+                  />
+                </motion.span>
               </button>
 
               <AnimatePresence initial={false}>
@@ -89,12 +96,12 @@ export function FaqSection() {
                     id={`faq-panel-${index}`}
                     role="region"
                     aria-labelledby={`faq-button-${index}`}
-                    initial={{ height: 0, opacity: 0 }}
+                    initial={reduceMotion ? false : { height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
-                    <p className="px-6 pb-6 text-sm leading-7 text-muted-foreground">
+                    <p className="pb-6 pr-10 text-sm leading-7 text-muted-foreground">
                       {faq.answer}
                     </p>
                   </motion.div>

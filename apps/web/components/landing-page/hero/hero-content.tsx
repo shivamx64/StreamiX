@@ -13,9 +13,9 @@ export function HeroContent() {
       <Reveal>
         <Link
           href="#features"
-          className="group inline-flex items-center gap-2 rounded-full border border-border bg-background py-1.5 pl-1.5 pr-3.5 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/40"
+          className="group inline-flex items-center gap-2 rounded-md border border-border bg-background py-1 pl-1 pr-3 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/40 hover:shadow-primary/10"
         >
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-sm bg-primary text-primary-foreground">
             <Sparkles className="h-3 w-3" />
           </span>
           Introducing adaptive HLS streaming

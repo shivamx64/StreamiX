@@ -10,13 +10,13 @@ export function MarketingSectionHeading({
   className,
 }: MarketingSectionHeadingProps) {
   return (
-    <h2
+    <h1
       className={cn(
-        "text-balance text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl",
+        "font-display text-balance text-5xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl lg:text-7xl",
         className,
       )}
     >
       {children}
-    </h2>
+    </h1>
   );
 }

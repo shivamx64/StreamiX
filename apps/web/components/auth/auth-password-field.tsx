@@ -26,6 +26,7 @@ export function AuthPasswordField({
       <PasswordInput
         id={id}
         autoComplete={autoComplete}
+        aria-invalid={error ? true : undefined}
         className="mt-2"
         {...inputProps}
       />

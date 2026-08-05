@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Reveal } from "@/components/shared-ui/reveal";
@@ -8,31 +8,22 @@ export function CtaSection() {
   return (
     <section className="px-6 pb-24 md:px-10 md:pb-32 lg:px-12">
       <Reveal>
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary to-orange-500 px-6 py-20 text-center shadow-2xl shadow-primary/20 md:px-16 md:py-24">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-md bg-gradient-to-br from-primary to-orange-600 px-6 py-20 text-center shadow-2xl shadow-primary/25 md:px-16 md:py-24">
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:56px_56px]"
+            className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:56px_56px]"
           />
           <div
             aria-hidden="true"
-            className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-2xl"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-white/10 blur-2xl"
+            className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl"
           />
 
           <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-              <Sparkles className="h-3.5 w-3.5" />
-              Get Started
-            </div>
-
-            <h2 className="mx-auto mt-8 max-w-2xl text-balance text-4xl font-bold tracking-tight text-white md:text-5xl">
+            <h2 className="font-display mx-auto max-w-2xl text-balance text-4xl font-semibold tracking-tight text-white md:text-5xl">
               Ready to start streaming?
             </h2>
 
-            <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-white/80 md:text-lg">
+            <p className="mx-auto mt-4 max-w-xl text-pretty text-base leading-7 text-white/80 md:text-lg">
               Create a free account and upload your first video in minutes.
               Your content will be processing before you finish your coffee.
             </p>
@@ -41,11 +32,11 @@ export function CtaSection() {
               <Button
                 size="lg"
                 asChild
-                className="bg-white text-primary shadow-sm hover:bg-white/90"
+                className="group bg-white text-primary shadow-sm hover:bg-white/90"
               >
                 <Link href="/signup">
                   Start Building
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
 
@@ -60,6 +51,10 @@ export function CtaSection() {
                 </Link>
               </Button>
             </div>
+
+            <p className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-white/60">
+              Free forever for personal projects
+            </p>
           </div>
         </div>
       </Reveal>

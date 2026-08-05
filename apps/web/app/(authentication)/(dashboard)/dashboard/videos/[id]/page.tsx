@@ -9,23 +9,11 @@ import { ProcessingStatusTracker } from "@/components/dashboard/processing-statu
 import { VideoStatusBadge } from "@/components/dashboard/video-status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatBytes } from "@/lib/format";
 import {
   useDeleteVideo,
   useVideoDetails,
 } from "@/hooks/use-video-processing";
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-
-  const units = ["B", "KB", "MB", "GB"];
-  const i = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const value = bytes / Math.pow(1024, i);
-
-  return `${value.toFixed(1)} ${units[i]}`;
-}
 
 export default function VideoDetailPage() {
   const router = useRouter();
@@ -54,7 +42,7 @@ export default function VideoDetailPage() {
       </Link>
 
       {videoQuery.isLoading && (
-        <div className="h-64 animate-pulse rounded-3xl border border-border bg-muted" />
+        <div className="h-64 animate-pulse rounded-md border border-border bg-muted" />
       )}
 
       {videoQuery.isError && (
@@ -73,7 +61,7 @@ export default function VideoDetailPage() {
           <div>
             <div className="flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
                   <FileVideo className="h-6 w-6" />
                 </div>
 
@@ -103,7 +91,7 @@ export default function VideoDetailPage() {
           <div className="flex justify-end">
             <Button
               variant="ghost"
-              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              className="text-danger-soft-foreground hover:bg-danger-soft hover:text-danger"
               onClick={onDelete}
               disabled={deleteVideo.isPending}
             >

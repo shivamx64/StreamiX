@@ -16,7 +16,7 @@ export function DocsCallout({
   return (
     <div
       className={cn(
-        "mt-4 flex gap-3 rounded-xl border p-4 text-sm leading-6",
+        "mt-4 flex gap-3 rounded-md border p-4 text-sm leading-6",
         variant === "warning"
           ? "border-amber-200 bg-amber-50 text-amber-900"
           : "border-primary/20 bg-primary/5 text-foreground",

@@ -23,6 +23,7 @@ export function AuthEmailField({
         type="email"
         autoComplete="email"
         placeholder="you@example.com"
+        aria-invalid={error ? true : undefined}
         className="mt-2"
         {...inputProps}
       />

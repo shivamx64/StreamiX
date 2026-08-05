@@ -172,7 +172,7 @@ export default function DashboardHomePage() {
 function EmptyDashboardHero() {
   return (
     <Card className="flex flex-col items-center px-6 py-16 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-accent text-accent-foreground">
+      <div className="flex h-14 w-14 items-center justify-center rounded-md bg-gradient-to-br from-primary/20 via-accent to-transparent text-primary ring-1 ring-primary/20">
         <UploadCloud className="h-6 w-6" />
       </div>
 

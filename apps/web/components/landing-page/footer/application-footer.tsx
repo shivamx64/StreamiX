@@ -39,10 +39,10 @@ export function ApplicationFooter() {
               href="/"
               className="inline-flex items-center gap-2.5"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <Clapperboard className="h-5 w-5" strokeWidth={2.5} />
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <Clapperboard className="h-4.5 w-4.5" strokeWidth={2.5} />
               </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">
+              <span className="font-display text-base font-semibold tracking-tight text-foreground">
                 StreamiX
               </span>
             </Link>
@@ -56,14 +56,14 @@ export function ApplicationFooter() {
               <Link
                 href="mailto:support@streamix.dev"
                 aria-label="Email StreamiX"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
               >
                 <Mail className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
                 aria-label="StreamiX website"
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition hover:border-primary hover:text-primary"
               >
                 <Globe className="h-4 w-4" />
               </Link>

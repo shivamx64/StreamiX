@@ -22,7 +22,7 @@ export function DocsEndpoint({
   description,
 }: DocsEndpointProps) {
   return (
-    <div className="mt-4 flex flex-col gap-2 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-center">
+    <div className="mt-4 flex flex-col gap-2 rounded-md border border-border bg-card p-4 sm:flex-row sm:items-center">
       <div className="flex shrink-0 items-center gap-3 sm:w-72">
         <span
           className={cn(

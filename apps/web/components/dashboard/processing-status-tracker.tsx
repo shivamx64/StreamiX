@@ -57,9 +57,9 @@ export function ProcessingStatusTracker({
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         {status === "failed" ? (
-          <XCircle className="h-5 w-5 text-red-600" />
+          <XCircle className="h-5 w-5 text-danger-soft-foreground" />
         ) : status === "completed" ? (
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <CheckCircle2 className="h-5 w-5 text-success-soft-foreground" />
         ) : (
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         )}
@@ -84,13 +84,13 @@ export function ProcessingStatusTracker({
                   className={cn(
                     "flex h-8 w-8 items-center justify-center rounded-full border",
                     state === "done" &&
-                      "border-green-200 bg-green-50 text-green-600",
+                      "border-success/30 bg-success-soft text-success-soft-foreground",
                     state === "active" &&
                       "border-primary/30 bg-accent text-primary",
                     state === "pending" &&
                       "border-border bg-muted text-muted-foreground",
                     state === "failed" &&
-                      "border-red-200 bg-red-50 text-red-600",
+                      "border-danger/30 bg-danger-soft text-danger-soft-foreground",
                   )}
                 >
                   <Icon
@@ -106,7 +106,7 @@ export function ProcessingStatusTracker({
                     className={cn(
                       "h-8 w-px",
                       state === "done"
-                        ? "bg-green-200"
+                        ? "bg-success/40"
                         : "bg-border",
                     )}
                   />
@@ -126,7 +126,7 @@ export function ProcessingStatusTracker({
         })}
       </ol>
 
-      <div className="flex items-center gap-2 rounded-xl bg-muted/50 px-4 py-3 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 rounded-md bg-muted/50 px-4 py-3 text-xs text-muted-foreground">
         <Cpu className="h-4 w-4 shrink-0" />
         <UploadCloud className="h-4 w-4 shrink-0" />
         Status refreshes automatically while processing.
