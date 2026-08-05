@@ -28,6 +28,11 @@ type Service interface {
 		refreshToken string,
 	) (*LoginResponse, error)
 
+	Logout(
+		ctx context.Context,
+		refreshToken string,
+	) error
+
 	Me(
 		ctx context.Context,
 		userID string,
@@ -37,16 +42,19 @@ type Service interface {
 type service struct {
 	repository   Repository
 	tokenManager *auth.TokenManager
+	sessions     auth.RefreshSessionStore
 }
 
 // NewService creates a user service.
 func NewService(
 	repository Repository,
 	tokenManager *auth.TokenManager,
+	sessions auth.RefreshSessionStore,
 ) Service {
 	return &service{
 		repository:   repository,
 		tokenManager: tokenManager,
+		sessions:     sessions,
 	}
 }
 
@@ -127,10 +135,21 @@ func (s *service) Login(
 		return nil, err
 	}
 
-	refreshToken, err := s.tokenManager.GenerateRefreshToken(
+	refreshToken, refreshID, err := s.tokenManager.GenerateRefreshTokenWithID(
 		user.ID.String(),
 	)
 	if err != nil {
+		return nil, err
+	}
+
+	// Record the refresh token as an active session so it can be
+	// enforced, revoked, and reused-detected on later refresh calls.
+	if err := s.sessions.Put(
+		ctx,
+		refreshID,
+		user.ID.String(),
+		s.tokenManager.RefreshTokenTTL(),
+	); err != nil {
 		return nil, err
 	}
 
@@ -144,9 +163,10 @@ func (s *service) Login(
 
 // Refresh validates a refresh token and issues a new token pair.
 //
-// The refresh token is rotated: both the returned access token and
-// refresh token are freshly generated, so each refresh invalidates the
-// previously held refresh token.
+// The refresh token is rotated and enforced server-side: only the most
+// recently issued token for a session is accepted. Presenting an older,
+// already-rotated token is treated as reuse of a possibly stolen token
+// and rejected.
 func (s *service) Refresh(
 	ctx context.Context,
 	refreshToken string,
@@ -159,9 +179,21 @@ func (s *service) Refresh(
 		return nil, ErrInvalidRefreshToken
 	}
 
+	// Reuse detection: the token must still be an active session.
+	userID, err := s.sessions.Get(ctx, claims.ID)
+	if err != nil {
+		if errors.Is(err, auth.ErrInvalidToken) {
+			return nil, ErrInvalidRefreshToken
+		}
+		return nil, err
+	}
+	if userID != claims.UserID {
+		return nil, ErrInvalidRefreshToken
+	}
+
 	user, err := s.repository.FindByID(
 		ctx,
-		claims.UserID,
+		userID,
 	)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
@@ -177,10 +209,26 @@ func (s *service) Refresh(
 		return nil, err
 	}
 
-	newRefreshToken, err := s.tokenManager.GenerateRefreshToken(
+	newRefreshToken, newRefreshID, err := s.tokenManager.GenerateRefreshTokenWithID(
 		user.ID.String(),
 	)
 	if err != nil {
+		return nil, err
+	}
+
+	// Register the successor session before revoking the current one
+	// so a failure in between never leaves the user sessionless.
+	if err := s.sessions.Put(
+		ctx,
+		newRefreshID,
+		user.ID.String(),
+		s.tokenManager.RefreshTokenTTL(),
+	); err != nil {
+		return nil, err
+	}
+
+	// Rotate: the presented refresh token stops working immediately.
+	if err := s.sessions.Delete(ctx, claims.ID); err != nil {
 		return nil, err
 	}
 
@@ -190,6 +238,25 @@ func (s *service) Refresh(
 		TokenType:    "Bearer",
 		ExpiresIn:    s.tokenManager.AccessTokenExpiresIn(),
 	}, nil
+}
+
+// Logout revokes a refresh token server-side. Logout is idempotent:
+// presenting an already-invalid token still counts as logged out.
+func (s *service) Logout(
+	ctx context.Context,
+	refreshToken string,
+) error {
+
+	claims, err := s.tokenManager.ValidateRefreshToken(
+		refreshToken,
+	)
+	if err != nil {
+		// Nothing to revoke; the token is either expired or was
+		// already rotated away.
+		return nil
+	}
+
+	return s.sessions.Delete(ctx, claims.ID)
 }
 
 // Me returns the currently authenticated user,

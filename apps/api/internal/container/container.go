@@ -28,6 +28,7 @@ func New(
 	logger *slog.Logger,
 	db *gorm.DB,
 	tokenManager *auth.TokenManager,
+	sessionStore auth.RefreshSessionStore,
 	storageBackend storage.Storage,
 	jobQueue videos.JobQueue,
 ) *Container {
@@ -37,6 +38,7 @@ func New(
 	userService := users.NewService(
 		userRepository,
 		tokenManager,
+		sessionStore,
 	)
 
 	userHandler := users.NewHandler(

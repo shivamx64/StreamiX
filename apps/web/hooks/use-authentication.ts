@@ -94,10 +94,20 @@ export function useAuthentication() {
     [persistTokens],
   );
 
-  const logout = useCallback(() => {
-    persistTokens(null);
-    setError(null);
-  }, [persistTokens]);
+  const logout = useCallback(async () => {
+    // Revoke the refresh token server-side. Local logout always
+    // proceeds, even if the revocation request fails.
+    try {
+      if (tokens?.refreshToken) {
+        await authenticationService.logout(tokens.refreshToken);
+      }
+    } catch {
+      // ignore: local state is cleared regardless
+    } finally {
+      persistTokens(null);
+      setError(null);
+    }
+  }, [persistTokens, tokens]);
 
   return {
     tokens,

@@ -35,12 +35,28 @@ func NewTokenManager(cfg config.AuthConfig) *TokenManager {
 
 // GenerateAccessToken creates a signed access token.
 func (m *TokenManager) GenerateAccessToken(userID string) (string, error) {
-	return m.generateToken(userID, m.accessTokenTTL, "access")
+	token, _, err := m.generateToken(userID, m.accessTokenTTL, "access")
+	return token, err
 }
 
 // GenerateRefreshToken creates a signed refresh token.
 func (m *TokenManager) GenerateRefreshToken(userID string) (string, error) {
+	token, _, err := m.generateToken(userID, m.refreshTokenTTL, "refresh")
+	return token, err
+}
+
+// GenerateRefreshTokenWithID creates a signed refresh token and returns
+// it alongside its unique ID (jti). The jti identifies the token in the
+// refresh session store for rotation, revocation, and reuse detection.
+func (m *TokenManager) GenerateRefreshTokenWithID(
+	userID string,
+) (string, string, error) {
 	return m.generateToken(userID, m.refreshTokenTTL, "refresh")
+}
+
+// RefreshTokenTTL returns the refresh token lifetime.
+func (m *TokenManager) RefreshTokenTTL() time.Duration {
+	return m.refreshTokenTTL
 }
 
 // AccessTokenExpiresIn returns the access token lifetime in seconds.
@@ -106,12 +122,13 @@ func (m *TokenManager) ValidateRefreshToken(
 	return m.validateToken(tokenString, "refresh")
 }
 
-// generateToken creates and signs a JWT.
+// generateToken creates and signs a JWT and returns the token string
+// alongside its unique ID (jti).
 func (m *TokenManager) generateToken(
 	userID string,
 	ttl time.Duration,
 	tokenType string,
-) (string, error) {
+) (string, string, error) {
 
 	now := time.Now()
 	claims := Claims{
@@ -128,5 +145,10 @@ func (m *TokenManager) generateToken(
 		jwt.SigningMethodHS256,
 		claims,
 	)
-	return token.SignedString(m.secret)
+	signed, err := token.SignedString(m.secret)
+	if err != nil {
+		return "", "", err
+	}
+
+	return signed, claims.ID, nil
 }

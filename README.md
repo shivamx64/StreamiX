@@ -497,12 +497,11 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 The following milestones follow naturally from the current implementation:
 
 1. **HLS serving** — an endpoint that serves the generated `hls/` output (playlists, segments, thumbnails) with auth, plus an in-dashboard video player. This makes the transcoding pipeline end-to-end usable.
-2. **Refresh token rotation** — implement `POST /auth/refresh` (the web client already references it), token revocation, and short refresh-token lifetimes.
-3. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
-4. **Containerized development** — Docker Compose for PostgreSQL, Redis, API, worker, and web, with the FFmpeg binaries baked into the worker image.
-5. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
-6. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
-7. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
+2. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
+3. **Containerized development** — Docker Compose for PostgreSQL, Redis, API, worker, and web, with the FFmpeg binaries baked into the worker image.
+4. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
+5. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
+6. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
 
 ## Contributing
 

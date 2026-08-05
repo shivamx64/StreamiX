@@ -139,6 +139,34 @@ func (h *Handler) Refresh(ctx *gin.Context) {
 	)
 }
 
+// Logout revokes the presented refresh token server-side.
+func (h *Handler) Logout(ctx *gin.Context) {
+
+	var request RefreshRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		apphttp.BadRequest(
+			ctx,
+			"invalid request payload",
+		)
+		return
+	}
+
+	if err := h.service.Logout(
+		ctx.Request.Context(),
+		request.RefreshToken,
+	); err != nil {
+		apphttp.InternalServerError(ctx)
+		return
+	}
+
+	apphttp.Success(
+		ctx,
+		"logged out successfully",
+		nil,
+	)
+}
+
 // Me returns the currently authenticated user.
 func (h *Handler) Me(ctx *gin.Context) {
 

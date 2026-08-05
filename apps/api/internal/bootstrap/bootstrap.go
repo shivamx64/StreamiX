@@ -15,6 +15,7 @@ import (
 	"github.com/shivamx64/streamix/internal/queue"
 	"github.com/shivamx64/streamix/internal/storage"
 	"github.com/shivamx64/streamix/internal/videos"
+	"github.com/redis/go-redis/v9"
 )
 
 type Application struct {
@@ -46,6 +47,28 @@ func New() (*Application, error) {
 	storageBackend := storage.NewLocalStorage(
 		cfg.Storage.LocalRoot,
 	)
+
+	// Refresh sessions are persisted in Redis so that token rotation,
+	// logout, and reuse detection are enforced server-side. When Redis
+	// is unavailable the API degrades to an in-process store so auth
+	// still works on a single node.
+	var sessionStore auth.RefreshSessionStore
+
+	sessionClient := redis.NewClient(&redis.Options{
+		Addr:     cfg.Queue.RedisAddr,
+		Password: cfg.Queue.RedisPassword,
+		DB:       cfg.Queue.RedisDB,
+	})
+
+	if err := sessionClient.Ping(context.Background()).Err(); err != nil {
+		log.Warn(
+			"redis unavailable; refresh sessions tracked in memory only",
+			"error", err,
+		)
+		sessionStore = auth.NewMemoryRefreshSessionStore()
+	} else {
+		sessionStore = auth.NewRedisRefreshSessionStore(sessionClient)
+	}
 
 	// The job queue publishes transcoding work for workers.
 	// Fall back to a no-op queue when redis is unavailable so the
@@ -82,6 +105,7 @@ func New() (*Application, error) {
 		log,
 		db,
 		tokenManager,
+		sessionStore,
 		storageBackend,
 		jobQueue,
 	)

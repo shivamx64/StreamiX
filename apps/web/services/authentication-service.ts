@@ -53,4 +53,10 @@ export const authenticationService = {
       throw new Error("Invalid registration response");
     }
   },
+
+  async logout(refreshToken: string): Promise<void> {
+    await apiClient.post(apiEndpoints.auth.logout, {
+      refresh_token: refreshToken,
+    });
+  },
 };
