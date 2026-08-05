@@ -48,11 +48,12 @@ func main() {
 
 	streams, err := queue.New(
 		queue.Config{
-			Addr:     cfg.Queue.RedisAddr,
-			Password: cfg.Queue.RedisPassword,
-			DB:       cfg.Queue.RedisDB,
-			Stream:   cfg.Queue.Stream,
-			Group:    cfg.Queue.Group,
+			Addr:      cfg.Queue.RedisAddr,
+			Password:  cfg.Queue.RedisPassword,
+			DB:        cfg.Queue.RedisDB,
+			Stream:    cfg.Queue.Stream,
+			Group:     cfg.Queue.Group,
+			ClaimIdle: cfg.Queue.ClaimIdle,
 		},
 		logger,
 	)

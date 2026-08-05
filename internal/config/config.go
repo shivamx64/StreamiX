@@ -94,4 +94,8 @@ type QueueConfig struct {
 
 	Stream string
 	Group  string
+
+	// ClaimIdle is how long a failed job may sit unretried before
+	// a consumer reclaims it.
+	ClaimIdle time.Duration
 }

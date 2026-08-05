@@ -26,10 +26,11 @@ type Handler func(ctx context.Context, message Message) error
 
 // Queue is a Redis Streams based job queue.
 type Queue struct {
-	client *redis.Client
-	stream string
-	group  string
-	logger *slog.Logger
+	client    *redis.Client
+	stream    string
+	group     string
+	claimIdle time.Duration
+	logger    *slog.Logger
 }
 
 // Config holds connection settings for a Redis backed queue.
@@ -40,6 +41,11 @@ type Config struct {
 
 	Stream string
 	Group  string
+
+	// ClaimIdle is how long a message may sit in the pending list
+	// before it is reclaimed by a consumer for retry. Zero reclaims
+	// pending messages immediately.
+	ClaimIdle time.Duration
 }
 
 // New creates subscription to the stream.
@@ -58,10 +64,11 @@ func New(cfg Config, logger *slog.Logger) (*Queue, error) {
 	}
 
 	q := &Queue{
-		client: client,
-		stream: cfg.Stream,
-		group:  cfg.Group,
-		logger: logger,
+		client:    client,
+		stream:    cfg.Stream,
+		group:     cfg.Group,
+		claimIdle: cfg.ClaimIdle,
+		logger:    logger,
 	}
 
 	if err := q.ensureGroup(ctx); err != nil {
@@ -135,12 +142,25 @@ func (q *Queue) Consume(
 			return nil
 		}
 
+		// Reclaim pending messages left by failed or crashed
+		// consumers so their jobs are retried.
+		if err := q.claimPending(
+			ctx,
+			consumer,
+			handler,
+		); err != nil {
+			q.logger.Error(
+				"pending message claim failed",
+				"error", err,
+			)
+		}
+
 		results, err := q.client.XReadGroup(ctx, &redis.XReadGroupArgs{
 			Group:    q.group,
 			Consumer: consumer,
 			Streams:  []string{q.stream, ">"},
 			Count:    10,
-			Block:    time.Second * 5,
+			Block:    time.Second,
 		}).Result()
 		if err == redis.Nil {
 			continue
@@ -175,6 +195,44 @@ func (q *Queue) Consume(
 			}
 		}
 	}
+}
+
+// claimPending reclaims messages that have been idle for longer
+// than the configured threshold and reprocesses them.
+func (q *Queue) claimPending(
+	ctx context.Context,
+	consumer string,
+	handler Handler,
+) error {
+
+	claimed, _, err := q.client.XAutoClaim(ctx, &redis.XAutoClaimArgs{
+		Stream:   q.stream,
+		Group:    q.group,
+		Consumer: consumer,
+		MinIdle:  q.claimIdle,
+		Start:    "0",
+		Count:    100,
+	}).Result()
+	if err != nil {
+		return fmt.Errorf("claim pending messages: %w", err)
+	}
+
+	for _, message := range claimed {
+		if err := q.process(
+			ctx,
+			consumer,
+			message,
+			handler,
+		); err != nil {
+			q.logger.Error(
+				"claimed message processing failed",
+				"error", err,
+				"message_id", message.ID,
+			)
+		}
+	}
+
+	return nil
 }
 
 // process decodes a stream message and delegates to the handler.

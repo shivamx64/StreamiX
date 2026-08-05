@@ -78,6 +78,16 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 
+	claimIdle, err := time.ParseDuration(
+		getEnv("QUEUE_CLAIM_IDLE", "3s"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"configuration error: QUEUE_CLAIM_IDLE must be a valid duration: %w",
+			err,
+		)
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Name:        getEnv("APP_NAME", "streamix-api"),
@@ -112,6 +122,7 @@ func Load() (*Config, error) {
 			RedisDB:       redisDB,
 			Stream:        getEnv("QUEUE_STREAM", "video-transcode"),
 			Group:         getEnv("QUEUE_GROUP", "transcode-workers"),
+			ClaimIdle:     claimIdle,
 		},
 	}
 
