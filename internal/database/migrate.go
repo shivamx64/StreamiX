@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/shivamx64/streamix/internal/users"
+	"github.com/shivamx64/streamix/internal/videos"
 	"gorm.io/gorm"
 )
 
@@ -11,8 +12,9 @@ import (
 func Migrate(db *gorm.DB) error {
 	if err := db.AutoMigrate(
 		&users.User{},
+		&videos.Video{},
 	); err != nil {
-		return fmt.Errorf("auto migrate users table: %w", err)
+		return fmt.Errorf("auto migrate database schema: %w", err)
 	}
 	return nil
 }

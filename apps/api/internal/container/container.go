@@ -7,6 +7,7 @@ import (
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/storage"
 	"github.com/shivamx64/streamix/internal/users"
+	"github.com/shivamx64/streamix/internal/videos"
 
 	"gorm.io/gorm"
 )
@@ -17,10 +18,9 @@ type Container struct {
 	DB     *gorm.DB
 
 	TokenManager *auth.TokenManager
-
 	Storage storage.Storage
-
 	UserHandler *users.Handler
+	VideoHandler *videos.Handler
 }
 
 func New(
@@ -42,6 +42,17 @@ func New(
 		userService,
 	)
 
+	videoRepository := videos.NewRepository(db)
+
+	videoService := videos.NewService(
+		videoRepository,
+		storageBackend,
+	)
+
+	videoHandler := videos.NewHandler(
+		videoService,
+	)
+
 	return &Container{
 		Config: cfg,
 		Logger: logger,
@@ -51,5 +62,7 @@ func New(
 		Storage:      storageBackend,
 
 		UserHandler: userHandler,
+
+		VideoHandler: videoHandler,
 	}
 }

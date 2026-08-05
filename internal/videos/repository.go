@@ -20,6 +20,11 @@ type Repository interface {
 		ctx context.Context,
 		userID string,
 	) ([]Video, error)
+
+	Delete(
+		ctx context.Context,
+		id string,
+	) error
 }
 
 type repository struct {
@@ -89,4 +94,16 @@ func (r *repository) ListByUser(
 	}
 
 	return videos, nil
+}
+
+// Delete removes a video record by its ID.
+func (r *repository) Delete(
+	ctx context.Context,
+	id string,
+) error {
+
+	return r.db.
+		WithContext(ctx).
+		Delete(&Video{}, "id = ?", id).
+		Error
 }

@@ -67,4 +67,35 @@ func Register(router *gin.Engine, c *container.Container) {
 		"/me",
 		c.UserHandler.Me,
 	)
+
+	// Video routes.
+	videos := api.Group("/videos")
+	videos.Use(
+		middleware.Auth(c.TokenManager),
+	)
+
+	videos.POST(
+		"",
+		c.VideoHandler.Upload,
+	)
+
+	videos.GET(
+		"",
+		c.VideoHandler.List,
+	)
+
+	videos.GET(
+		"/:id",
+		c.VideoHandler.Get,
+	)
+
+	videos.GET(
+		"/:id/status",
+		c.VideoHandler.Status,
+	)
+
+	videos.DELETE(
+		"/:id",
+		c.VideoHandler.Delete,
+	)
 }
