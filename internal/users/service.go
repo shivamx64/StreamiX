@@ -23,6 +23,11 @@ type Service interface {
 		password string,
 	) (*LoginResponse, error)
 
+	Refresh(
+		ctx context.Context,
+		refreshToken string,
+	) (*LoginResponse, error)
+
 	Me(
 		ctx context.Context,
 		userID string,
@@ -132,6 +137,56 @@ func (s *service) Login(
 	return &LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    "Bearer",
+		ExpiresIn:    s.tokenManager.AccessTokenExpiresIn(),
+	}, nil
+}
+
+// Refresh validates a refresh token and issues a new token pair.
+//
+// The refresh token is rotated: both the returned access token and
+// refresh token are freshly generated, so each refresh invalidates the
+// previously held refresh token.
+func (s *service) Refresh(
+	ctx context.Context,
+	refreshToken string,
+) (*LoginResponse, error) {
+
+	claims, err := s.tokenManager.ValidateRefreshToken(
+		refreshToken,
+	)
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	user, err := s.repository.FindByID(
+		ctx,
+		claims.UserID,
+	)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return nil, ErrInvalidRefreshToken
+		}
+		return nil, err
+	}
+
+	accessToken, err := s.tokenManager.GenerateAccessToken(
+		user.ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newRefreshToken, err := s.tokenManager.GenerateRefreshToken(
+		user.ID.String(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
 		TokenType:    "Bearer",
 		ExpiresIn:    s.tokenManager.AccessTokenExpiresIn(),
 	}, nil

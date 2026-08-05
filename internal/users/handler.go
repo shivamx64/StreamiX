@@ -101,6 +101,44 @@ func (h *Handler) Login(ctx *gin.Context) {
 	)
 }
 
+// Refresh issues a new token pair from a valid refresh token.
+func (h *Handler) Refresh(ctx *gin.Context) {
+
+	var request RefreshRequest
+
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		apphttp.BadRequest(
+			ctx,
+			"invalid request payload",
+		)
+		return
+	}
+
+	response, err := h.service.Refresh(
+		ctx.Request.Context(),
+		request.RefreshToken,
+	)
+
+	if err != nil {
+		switch err {
+		case ErrInvalidRefreshToken:
+			apphttp.Unauthorized(
+				ctx,
+				"invalid or expired refresh token",
+			)
+		default:
+			apphttp.InternalServerError(ctx)
+		}
+		return
+	}
+
+	apphttp.Success(
+		ctx,
+		"tokens refreshed successfully",
+		response,
+	)
+}
+
 // Me returns the currently authenticated user.
 func (h *Handler) Me(ctx *gin.Context) {
 
@@ -125,8 +163,8 @@ func (h *Handler) Me(ctx *gin.Context) {
 	}
 
 	response := UserResponse{
-		ID:		user.ID.String(),
-		Email: 	user.Email,
+		ID:        user.ID.String(),
+		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 	}
 

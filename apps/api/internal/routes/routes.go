@@ -55,6 +55,11 @@ func Register(router *gin.Engine, c *container.Container) {
 			"/login",
 			c.UserHandler.Login,
 		)
+
+		auth.POST(
+			"/refresh",
+			c.UserHandler.Refresh,
+		)
 	}
 
 	// Protected authentication routes.

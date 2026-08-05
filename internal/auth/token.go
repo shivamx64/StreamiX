@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 
 	"github.com/shivamx64/streamix/internal/config"
 )
@@ -11,6 +12,7 @@ import (
 // Claims represents the JWT claims used by StreamiX.
 type Claims struct {
 	UserID string `json:"user_id"`
+	Type   string `json:"type"`
 
 	jwt.RegisteredClaims
 }
@@ -33,12 +35,12 @@ func NewTokenManager(cfg config.AuthConfig) *TokenManager {
 
 // GenerateAccessToken creates a signed access token.
 func (m *TokenManager) GenerateAccessToken(userID string) (string, error) {
-	return m.generateToken(userID, m.accessTokenTTL)
+	return m.generateToken(userID, m.accessTokenTTL, "access")
 }
 
 // GenerateRefreshToken creates a signed refresh token.
 func (m *TokenManager) GenerateRefreshToken(userID string) (string, error) {
-	return m.generateToken(userID, m.refreshTokenTTL)
+	return m.generateToken(userID, m.refreshTokenTTL, "refresh")
 }
 
 // AccessTokenExpiresIn returns the access token lifetime in seconds.
@@ -46,10 +48,16 @@ func (m *TokenManager) AccessTokenExpiresIn() int64 {
 	return int64(m.accessTokenTTL.Seconds())
 }
 
-// ValidateToken validates a JWT and returns its claims.
-// ValidateAccessToken validates an access token and returns its claims.
-func (m *TokenManager) ValidateAccessToken(
+// RefreshTokenExpiresIn returns the refresh token lifetime in seconds.
+func (m *TokenManager) RefreshTokenExpiresIn() int64 {
+	return int64(m.refreshTokenTTL.Seconds())
+}
+
+// validateToken parses a JWT and checks that it is valid and of the
+// expected type ("access" or "refresh").
+func (m *TokenManager) validateToken(
 	tokenString string,
+	wantType string,
 ) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(
@@ -75,20 +83,43 @@ func (m *TokenManager) ValidateAccessToken(
 		return nil, ErrInvalidToken
 	}
 
+	// A refresh token must never be accepted as an access token and
+	// vice versa.
+	if claims.Type != wantType {
+		return nil, ErrInvalidToken
+	}
+
 	return claims, nil
+}
+
+// ValidateAccessToken validates an access token and returns its claims.
+func (m *TokenManager) ValidateAccessToken(
+	tokenString string,
+) (*Claims, error) {
+	return m.validateToken(tokenString, "access")
+}
+
+// ValidateRefreshToken validates a refresh token and returns its claims.
+func (m *TokenManager) ValidateRefreshToken(
+	tokenString string,
+) (*Claims, error) {
+	return m.validateToken(tokenString, "refresh")
 }
 
 // generateToken creates and signs a JWT.
 func (m *TokenManager) generateToken(
 	userID string,
 	ttl time.Duration,
+	tokenType string,
 ) (string, error) {
 
 	now := time.Now()
 	claims := Claims{
 		UserID: userID,
+		Type:   tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
+			ID:        uuid.New().String(),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 		},
