@@ -10,7 +10,7 @@ import { AuthFormCard } from "@/components/auth/auth-form-card";
 import { AuthNameField } from "@/components/auth/auth-name-field";
 import { AuthPasswordField } from "@/components/auth/auth-password-field";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
-import { useAuthentication } from "@/hooks/use-authentication";
+import { useAuthenticationContext } from "@/providers/authentication-provider";
 import {
   registerSchema,
   type RegisterFormValues,
@@ -19,7 +19,7 @@ import {
 export default function SignupPage() {
   const router = useRouter();
   const { register: registerAccount, isSubmitting, error } =
-    useAuthentication();
+    useAuthenticationContext();
   const {
     register,
     handleSubmit,

@@ -9,7 +9,7 @@ import { AuthEmailField } from "@/components/auth/auth-email-field";
 import { AuthFormCard } from "@/components/auth/auth-form-card";
 import { AuthPasswordField } from "@/components/auth/auth-password-field";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
-import { useAuthentication } from "@/hooks/use-authentication";
+import { useAuthenticationContext } from "@/providers/authentication-provider";
 import {
   loginSchema,
   type LoginFormValues,
@@ -17,7 +17,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isSubmitting, error } = useAuthentication();
+  const { login, isSubmitting, error } = useAuthenticationContext();
   const {
     register,
     handleSubmit,
