@@ -3,10 +3,11 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { FileVideo, UploadCloud, CheckCircle2, XCircle } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/class-name";
+import { formatBytes } from "@/lib/format";
 import { useVideoUpload } from "@/hooks/use-video-upload";
 
 const ACCEPTED_VIDEO_TYPES = {
@@ -14,19 +15,6 @@ const ACCEPTED_VIDEO_TYPES = {
   "video/webm": [".webm"],
   "video/quicktime": [".mov"],
 };
-
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-
-  const units = ["B", "KB", "MB", "GB"];
-  const i = Math.min(
-    Math.floor(Math.log(bytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const value = bytes / Math.pow(1024, i);
-
-  return `${value.toFixed(1)} ${units[i]}`;
-}
 
 export default function VideoUploadPage() {
   const router = useRouter();
@@ -83,11 +71,11 @@ export default function VideoUploadPage() {
         </p>
       </div>
 
-      <Card className="p-6">
+      <div>
         <div
           {...getRootProps()}
           className={cn(
-            "flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-muted/30 px-6 py-14 text-center transition",
+            "flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-6 py-16 text-center transition",
             isDragActive &&
               "border-primary bg-accent",
             upload.isPending && "pointer-events-none opacity-60",
@@ -95,7 +83,7 @@ export default function VideoUploadPage() {
         >
           <input {...getInputProps()} />
 
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+          <div className="flex h-14 w-14 items-center justify-center rounded-md bg-accent text-accent-foreground">
             {upload.isPending ? (
               <FileVideo className="h-6 w-6" />
             ) : (
@@ -122,32 +110,35 @@ export default function VideoUploadPage() {
 
         {upload.isPending && (
           <div className="mt-6">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${progress}%` }}
+            <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+              <span className="truncate">{selectedFile?.name}</span>
+              <span className="tabular-nums">{progress}%</span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-md bg-muted">
+              <motion.div
+                className="h-full rounded-md bg-primary"
+                initial={{ width: "0%" }}
+                animate={{ width: `${progress}%` }}
+                transition={{ ease: "easeOut", duration: 0.25 }}
               />
             </div>
-            <p className="mt-2 text-right text-xs font-medium text-muted-foreground">
-              {progress}%
-            </p>
           </div>
         )}
 
         {error && (
-          <div className="mt-6 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="mt-6 flex items-center gap-2 rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground">
             <XCircle className="h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
 
         {upload.isSuccess && !error && (
-          <div className="mt-6 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+          <div className="mt-6 flex items-center gap-2 rounded-md border border-success/30 bg-success-soft px-4 py-3 text-sm font-medium text-success-soft-foreground">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             Upload complete. Redirecting to processing status...
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

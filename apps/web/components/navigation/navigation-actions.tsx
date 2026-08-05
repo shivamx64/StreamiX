@@ -12,7 +12,7 @@ export function NavigationActions() {
 				Log in
 			</Link>
 
-			<Button asChild size="sm" className="rounded-full">
+			<Button asChild size="sm">
 				<Link href="/signup">
 					Start Free
 				</Link>

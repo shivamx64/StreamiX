@@ -38,7 +38,7 @@ export default function LoginPage() {
   return (
     <AuthFormCard>
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">
           Welcome back
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -50,7 +50,7 @@ export default function LoginPage() {
         {error && (
           <div
             role="alert"
-            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+            className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground"
           >
             {error}
           </div>
@@ -69,12 +69,12 @@ export default function LoginPage() {
         />
 
         <div className="flex items-center justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-sm font-medium text-primary transition hover:text-primary/80"
+          <a
+            href="mailto:support@streamix.dev"
+            className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
-            Forgot password?
-          </Link>
+            Forgot password? Get help
+          </a>
         </div>
 
         <AuthSubmitButton loading={isSubmitting}>

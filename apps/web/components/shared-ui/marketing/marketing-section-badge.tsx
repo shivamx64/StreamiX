@@ -12,7 +12,7 @@ export function MarketingSectionBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground",
+        "inline-flex items-center gap-2 rounded-sm border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent-foreground",
         className,
       )}
     >

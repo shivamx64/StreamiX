@@ -19,6 +19,7 @@ import { cn } from "@/lib/class-name";
 import { formatBytes } from "@/lib/format";
 import { ApplicationContainer } from "@/components/ui/application-container";
 import { Button } from "@/components/ui/button";
+import { PageTransition } from "@/components/shared-ui/page-transition";
 
 type NavigationItem = {
   label: string;
@@ -285,7 +286,9 @@ export default function DashboardLayout({
 
         <main className="flex-1">
           <ApplicationContainer className="py-8 lg:py-10">
-            {children}
+            <PageTransition key={pathname}>
+              {children}
+            </PageTransition>
           </ApplicationContainer>
         </main>
       </div>

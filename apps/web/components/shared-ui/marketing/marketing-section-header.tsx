@@ -35,7 +35,7 @@ export function MarketingSectionHeader({
 
       <h2
         className={cn(
-          "max-w-2xl text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl",
+          "font-display max-w-3xl text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl",
           badge && "mt-6",
         )}
       >
@@ -43,7 +43,12 @@ export function MarketingSectionHeader({
       </h2>
 
       {description && (
-        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+        <p
+          className={cn(
+            "mt-5 max-w-2xl text-pretty text-base leading-7 text-muted-foreground md:text-lg md:leading-8",
+            align === "center" && "mx-auto",
+          )}
+        >
           {description}
         </p>
       )}

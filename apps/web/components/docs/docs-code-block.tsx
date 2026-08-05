@@ -31,7 +31,7 @@ export function DocsCodeBlock({
   return (
     <div
       className={cn(
-        "mt-4 overflow-hidden rounded-xl border border-border bg-muted/40",
+        "mt-4 overflow-hidden rounded-md border border-border bg-muted/40",
         className,
       )}
     >

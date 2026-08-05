@@ -23,6 +23,7 @@ export function AuthNameField({
         type="text"
         autoComplete="name"
         placeholder="Ada Lovelace"
+        aria-invalid={error ? true : undefined}
         className="mt-2"
         {...inputProps}
       />

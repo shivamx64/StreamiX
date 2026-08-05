@@ -193,7 +193,7 @@ export default function DocumentationPage() {
               transcoded into multiple HLS renditions.
             </DocsParagraph>
 
-            <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
+            <div className="mt-4 overflow-x-auto rounded-md border border-border bg-card">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
@@ -290,7 +290,7 @@ export default function DocumentationPage() {
               structured body to help you respond gracefully.
             </DocsParagraph>
 
-            <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
+            <div className="mt-4 overflow-x-auto rounded-md border border-border bg-card">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
