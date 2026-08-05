@@ -17,6 +17,7 @@ type Config struct {
 	Database DatabaseConfig
 	Auth     AuthConfig
 	Storage  StorageConfig
+	Queue    QueueConfig
 }
 
 // AppConfig contains metatadata about the running application
@@ -81,4 +82,16 @@ type AuthConfig struct {
 type StorageConfig struct {
 	Driver    string
 	LocalRoot string
+}
+
+// QueueConfig contains job queue configuration.
+type QueueConfig struct {
+	Driver string
+
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
+
+	Stream string
+	Group  string
 }

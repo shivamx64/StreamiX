@@ -7,3 +7,6 @@
 /apps/worker/worker
 *.exe
 
+# local object storage root
+/storage/
+

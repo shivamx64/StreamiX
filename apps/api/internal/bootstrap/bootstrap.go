@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,9 @@ import (
 	"github.com/shivamx64/streamix/internal/config"
 	"github.com/shivamx64/streamix/internal/database"
 	"github.com/shivamx64/streamix/internal/logger"
+	"github.com/shivamx64/streamix/internal/queue"
 	"github.com/shivamx64/streamix/internal/storage"
+	"github.com/shivamx64/streamix/internal/videos"
 )
 
 type Application struct {
@@ -44,12 +47,42 @@ func New() (*Application, error) {
 		cfg.Storage.LocalRoot,
 	)
 
+	// The job queue publishes transcoding work for workers.
+	// Fall back to a no-op queue when redis is unavailable so the
+	// upload flow keeps working without the worker infrastructure.
+	var jobQueue videos.JobQueue
+
+	streams, err := queue.New(
+		queue.Config{
+			Addr:     cfg.Queue.RedisAddr,
+			Password: cfg.Queue.RedisPassword,
+			DB:       cfg.Queue.RedisDB,
+			Stream:   cfg.Queue.Stream,
+			Group:    cfg.Queue.Group,
+		},
+		log,
+	)
+	if err != nil {
+		log.Warn(
+			"queue unavailable; videos will not be queued for transcoding",
+			"error", err,
+		)
+	} else {
+		jobQueue = videos.JobQueueFunc(
+			func(ctx context.Context, job videos.Job) error {
+				_, err := streams.Publish(ctx, "video.transcode", job)
+				return err
+			},
+		)
+	}
+
 	c := container.New(
 		cfg,
 		log,
 		db,
 		tokenManager,
 		storageBackend,
+		jobQueue,
 	)
 
 	router := gin.New()

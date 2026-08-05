@@ -73,6 +73,11 @@ func Load() (*Config, error) {
 		)
 	}
 
+	redisDB, err := getEnvAsInt("REDIS_DB", 0)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Name:        getEnv("APP_NAME", "streamix-api"),
@@ -99,6 +104,14 @@ func Load() (*Config, error) {
 		Storage: StorageConfig{
 			Driver:    getEnv("STORAGE_DRIVER", "local"),
 			LocalRoot: getEnv("LOCAL_STORAGE_ROOT", "storage"),
+		},
+		Queue: QueueConfig{
+			Driver:        getEnv("QUEUE_DRIVER", "redis"),
+			RedisAddr:     getEnv("REDIS_ADDR", "localhost:6379"),
+			RedisPassword: getEnv("REDIS_PASSWORD", ""),
+			RedisDB:       redisDB,
+			Stream:        getEnv("QUEUE_STREAM", "video-transcode"),
+			Group:         getEnv("QUEUE_GROUP", "transcode-workers"),
 		},
 	}
 

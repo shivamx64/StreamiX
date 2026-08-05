@@ -54,6 +54,28 @@ func (s *LocalStorage) Save(
 	}, nil
 }
 
+func (s *LocalStorage) Open(
+	ctx context.Context,
+	key string,
+) (io.ReadCloser, error) {
+
+	path := filepath.Join(
+		s.root,
+		key,
+	)
+
+	file, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, ErrFileNotFound
+		}
+
+		return nil, fmt.Errorf("%w: %v", ErrOpenFailed, err)
+	}
+
+	return file, nil
+}
+
 func (s *LocalStorage) Delete(
 	ctx context.Context,
 	key string,

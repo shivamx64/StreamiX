@@ -21,6 +21,12 @@ type Repository interface {
 		userID string,
 	) ([]Video, error)
 
+	SetStatus(
+		ctx context.Context,
+		id string,
+		status Status,
+	) error
+
 	Delete(
 		ctx context.Context,
 		id string,
@@ -94,6 +100,21 @@ func (r *repository) ListByUser(
 	}
 
 	return videos, nil
+}
+
+// SetStatus updates the processing status of a video.
+func (r *repository) SetStatus(
+	ctx context.Context,
+	id string,
+	status Status,
+) error {
+
+	return r.db.
+		WithContext(ctx).
+		Model(&Video{}).
+		Where("id = ?", id).
+		Update("status", status).
+		Error
 }
 
 // Delete removes a video record by its ID.

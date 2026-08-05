@@ -40,16 +40,19 @@ type Service interface {
 type service struct {
 	repository Repository
 	storage    storage.Storage
+	queue      JobQueue
 }
 
 // NewService creates a video service.
 func NewService(
 	repository Repository,
 	storageBackend storage.Storage,
+	queue JobQueue,
 ) Service {
 	return &service{
 		repository: repository,
 		storage:    storageBackend,
+		queue:      queue,
 	}
 }
 
@@ -92,6 +95,22 @@ func (s *service) Upload(
 		// Roll back the stored file so we do not leak orphaned objects.
 		_ = s.storage.Delete(ctx, video.StorageKey)
 		return nil, err
+	}
+
+	// Queue the video for transcoding. A temporary failure to publish
+	// is non-fatal so the upload itself still succeeds; the video
+	// remains in the uploaded state until retried.
+	if s.queue != nil {
+		err = s.queue.Enqueue(ctx, Job{
+			VideoID:    video.ID.String(),
+			UserID:     userID,
+			StorageKey: video.StorageKey,
+			Filename:   video.OriginalFilename,
+		})
+		if err == nil {
+			video.Status = StatusQueued
+			_ = s.repository.SetStatus(ctx, video.ID.String(), StatusQueued)
+		}
 	}
 
 	return video, nil

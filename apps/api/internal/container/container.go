@@ -29,6 +29,7 @@ func New(
 	db *gorm.DB,
 	tokenManager *auth.TokenManager,
 	storageBackend storage.Storage,
+	jobQueue videos.JobQueue,
 ) *Container {
 
 	userRepository := users.NewRepository(db)
@@ -47,6 +48,7 @@ func New(
 	videoService := videos.NewService(
 		videoRepository,
 		storageBackend,
+		jobQueue,
 	)
 
 	videoHandler := videos.NewHandler(

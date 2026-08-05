@@ -19,6 +19,11 @@ type Storage interface {
 		reader io.Reader,
 	) (*File, error)
 
+	Open(
+		ctx context.Context,
+		key string,
+	) (io.ReadCloser, error)
+
 	Delete(
 		ctx context.Context,
 		key string,
