@@ -20,6 +20,7 @@ import { formatBytes } from "@/lib/format";
 import { ApplicationContainer } from "@/components/ui/application-container";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "@/components/shared-ui/page-transition";
+import { ThemeToggle } from "@/components/shared-ui/theme-toggle";
 
 type NavigationItem = {
   label: string;
@@ -178,17 +179,21 @@ function DashboardNavigation() {
         </div>
 
         <div className="mt-4 border-t border-border/60 pt-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none border border-border bg-accent text-xs font-bold text-accent-foreground">
-              {userInitials(user?.email)}
-            </span>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-none border border-border bg-accent text-xs font-bold text-accent-foreground">
+                {userInitials(user?.email)}
+              </span>
 
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">
-                {user?.email ?? "Account"}
-              </p>
-              <p className="text-xs text-muted-foreground">Free plan</p>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-foreground">
+                  {user?.email ?? "Account"}
+                </p>
+                <p className="text-xs text-muted-foreground">Free plan</p>
+              </div>
             </div>
+
+            <ThemeToggle className="h-8 w-8 rounded-md" />
           </div>
 
           <Button
@@ -237,6 +242,8 @@ function DashboardMobileNavigation() {
       >
         <LogOut className="h-4 w-4" />
       </Button>
+
+      <ThemeToggle className="ml-1 h-8 w-8 border border-border" />
     </div>
   );
 }

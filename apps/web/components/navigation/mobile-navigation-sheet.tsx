@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared-ui/theme-toggle";
 
 import { navigationItems } from "./navigation-links";
 import { NavigationLogo } from "./navigation-logo";
@@ -78,8 +79,10 @@ export function MobileNavigationSheet() {
 							}}
 							className="fixed inset-y-0 right-0 z-[70] flex w-[85%] max-w-sm flex-col border-l border-border bg-background p-6 md:hidden"
 						>
-							<div className="flex items-center justify-between">
-								<NavigationLogo />
+<div className="flex items-center justify-between">
+							<NavigationLogo />
+							<div className="flex items-center gap-2">
+								<ThemeToggle className="border border-border" />
 								<button
 									ref={closeButtonRef}
 									type="button"
@@ -90,6 +93,7 @@ export function MobileNavigationSheet() {
 									<X className="h-5 w-5" />
 								</button>
 							</div>
+						</div>
 
 							<nav
 								aria-label="Mobile navigation"
