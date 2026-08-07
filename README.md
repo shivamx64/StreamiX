@@ -4,6 +4,12 @@ StreamiX is a distributed media processing platform built to explore the enginee
 
 The project is a learning-oriented implementation of the systems that power modern media platforms: asynchronous job processing, object storage, distributed workers, realtime updates, and secure authentication. It is written as production-grade Go services with a Next.js frontend, and every layer is kept small enough to read end to end.
 
+## High Level Architecture
+
+StreamiX follows an asynchronous event-driven architecture where the API coordinates uploads, Redis queues transcoding jobs, Go workers process videos with FFmpeg, and Amazon S3 stores both raw uploads and HLS artifacts.
+
+![StreamiX High Level Architecture](./public/streamix-architecture.png)
+
 ## Features
 
 ### Current
