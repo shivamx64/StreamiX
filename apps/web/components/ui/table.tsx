@@ -22,7 +22,12 @@ export function Table({ className, ...props }: TableProps) {
 type THeadProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export function THead({ className, ...props }: THeadProps) {
-  return <thead className={cn("", className)} {...props} />;
+  return (
+    <thead
+      className={cn("border-b border-border/60 bg-muted/30", className)}
+      {...props}
+    />
+  );
 }
 
 type TBodyProps = HTMLAttributes<HTMLTableSectionElement>;

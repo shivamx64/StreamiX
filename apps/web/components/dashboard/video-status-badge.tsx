@@ -1,22 +1,34 @@
-import { cn } from "@/lib/class-name";
-import { statusBadgeClasses, statusLabels } from "@/lib/video-status";
+import { Badge } from "@/components/ui/badge";
+import { statusLabels } from "@/lib/video-status";
 import type { VideoStatus } from "@/types/video-types";
+
+import { cn } from "@/lib/class-name";
 
 type VideoStatusBadgeProps = {
   status: VideoStatus;
+  className?: string;
 };
+
+const toneByStatus = {
+  uploaded: "info",
+  queued: "warning",
+  processing: "processing",
+  completed: "success",
+  failed: "danger",
+} as const;
 
 export function VideoStatusBadge({
   status,
+  className,
 }: VideoStatusBadgeProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
-        statusBadgeClasses[status],
-      )}
+    <Badge
+      tone={toneByStatus[status]}
+      dot
+      pulse={status === "processing"}
+      className={cn(className)}
     >
       {statusLabels[status]}
-    </span>
+    </Badge>
   );
 }

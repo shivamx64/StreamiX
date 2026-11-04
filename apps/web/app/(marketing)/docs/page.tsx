@@ -11,6 +11,7 @@ import {
   DocsSidebar,
   type DocsSection,
 } from "@/components/docs/docs-sidebar";
+import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 
 export const metadata: Metadata = {
   title: "Documentation",
@@ -41,7 +42,7 @@ export default function DocumentationPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+          <h1 className="font-display mt-6 text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
             Documentation
           </h1>
           <p className="mt-4 text-lg leading-8 text-muted-foreground">
@@ -84,7 +85,7 @@ export default function DocumentationPage() {
               platform. Upload a video once, and we generate adaptive bitrate
               HLS renditions and serve them from the edge — no infrastructure
               to manage. Every request below is made to your{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-accent-foreground">
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
                 NEXT_PUBLIC_API_BASE_URL
               </code>
               .
@@ -102,7 +103,7 @@ export default function DocumentationPage() {
               </li>
               <li>
                 Include the token in the{" "}
-                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
+                <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
                   Authorization
                 </code>{" "}
                 header on every request.
@@ -119,9 +120,9 @@ export default function DocumentationPage() {
             <DocsHeading id="authentication">Authentication</DocsHeading>
             <DocsParagraph>
               StreamiX uses JSON Web Tokens. Register and log in to receive an{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">access_token</code>{" "}
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">access_token</code>{" "}
               and a{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">refresh_token</code>. Send
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">refresh_token</code>. Send
               the access token as a bearer token:
             </DocsParagraph>
 
@@ -158,7 +159,7 @@ export default function DocumentationPage() {
             <DocsHeading id="uploading-videos">Uploading videos</DocsHeading>
             <DocsParagraph>
               Upload a video as{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">multipart/form-data</code>. The
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">multipart/form-data</code>. The
               file is streamed directly to object storage, which avoids proxy
               bottlenecks and arbitrary size limits.
             </DocsParagraph>
@@ -193,49 +194,41 @@ export default function DocumentationPage() {
               transcoded into multiple HLS renditions.
             </DocsParagraph>
 
-            <div className="mt-4 overflow-x-auto rounded-md border border-border bg-card">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-3 font-semibold">Status</th>
-                    <th className="px-4 py-3 font-semibold">Meaning</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">
-                      queued
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+            <div className="mt-4 overflow-hidden rounded-lg border border-border/80 bg-card">
+              <Table>
+                <THead>
+                  <TR className="hover:bg-transparent">
+                    <TH>Status</TH>
+                    <TH>Meaning</TH>
+                  </TR>
+                </THead>
+                <TBody>
+                  <TR>
+                    <TD className="font-mono text-foreground">queued</TD>
+                    <TD className="text-muted-foreground">
                       Waiting for a worker to pick it up.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">
-                      processing
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">processing</TD>
+                    <TD className="text-muted-foreground">
                       Actively transcoding into renditions.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">
-                      completed
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">completed</TD>
+                    <TD className="text-muted-foreground">
                       All outputs generated and ready to stream.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">
-                      failed
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">failed</TD>
+                    <TD className="text-muted-foreground">
                       Processing errored — check the error details.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </TD>
+                  </TR>
+                </TBody>
+              </Table>
             </div>
 
             <DocsHeading id="checking-status">Check processing status</DocsHeading>
@@ -261,7 +254,7 @@ export default function DocumentationPage() {
               Once a video is complete, point any HLS-compatible player at its
               playlist URL. On browsers without native HLS support, use a
               library such as{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">hls.js</code>.
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">hls.js</code>.
             </DocsParagraph>
 
             <DocsCodeBlock
@@ -290,47 +283,47 @@ export default function DocumentationPage() {
               structured body to help you respond gracefully.
             </DocsParagraph>
 
-            <div className="mt-4 overflow-x-auto rounded-md border border-border bg-card">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-3 font-semibold">Code</th>
-                    <th className="px-4 py-3 font-semibold">Meaning</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">400</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+            <div className="mt-4 overflow-hidden rounded-lg border border-border/80 bg-card">
+              <Table>
+                <THead>
+                  <TR className="hover:bg-transparent">
+                    <TH>Code</TH>
+                    <TH>Meaning</TH>
+                  </TR>
+                </THead>
+                <TBody>
+                  <TR>
+                    <TD className="font-mono text-foreground">400</TD>
+                    <TD className="text-muted-foreground">
                       Invalid request body or parameters.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">401</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">401</TD>
+                    <TD className="text-muted-foreground">
                       Missing or invalid access token.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">404</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">404</TD>
+                    <TD className="text-muted-foreground">
                       The requested resource does not exist.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">429</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">429</TD>
+                    <TD className="text-muted-foreground">
                       Too many requests — slow down or paginate.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-foreground">500</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    </TD>
+                  </TR>
+                  <TR>
+                    <TD className="font-mono text-foreground">500</TD>
+                    <TD className="text-muted-foreground">
                       Something went wrong on our side.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </TD>
+                  </TR>
+                </TBody>
+              </Table>
             </div>
 
             <DocsCodeBlock

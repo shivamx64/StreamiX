@@ -8,7 +8,7 @@ export function CtaSection() {
   return (
     <section className="px-6 pb-24 md:px-10 md:pb-32 lg:px-12">
       <Reveal>
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-md bg-gradient-to-br from-primary to-orange-600 px-6 py-20 text-center shadow-2xl shadow-primary/25 md:px-16 md:py-24">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-xl bg-gradient-to-br from-primary to-orange-600 px-6 py-20 text-center shadow-2xl shadow-primary/25 ring-1 ring-inset ring-white/10 md:px-16 md:py-24">
           <div
             aria-hidden="true"
             className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:56px_56px]"

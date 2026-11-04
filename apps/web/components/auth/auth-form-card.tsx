@@ -6,7 +6,7 @@ type AuthFormCardProps = {
 
 export function AuthFormCard({ children }: AuthFormCardProps) {
   return (
-    <div className="rounded-none border border-border bg-card p-8 shadow-sm md:p-10">
+    <div className="rounded-xl border border-border/80 bg-card p-8 shadow-xl shadow-foreground/[0.04] md:p-10">
       {children}
     </div>
   );

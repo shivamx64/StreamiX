@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight, FileVideo } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
+import { cn } from "@/lib/class-name";
 import { formatRelativeTime } from "@/lib/format";
+import { statusIconClasses } from "@/lib/video-status";
 import type { Video } from "@/types/video-types";
 
 import { VideoStatusBadge } from "./video-status-badge";
@@ -32,10 +34,10 @@ export function RecentUploads({ videos }: RecentUploadsProps) {
 
         <Link
           href="/dashboard/videos"
-          className="flex items-center gap-1 text-xs font-medium text-primary transition hover:text-primary/80"
+          className="group flex items-center gap-1 text-xs font-medium text-primary transition hover:text-primary/80"
         >
           View all
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
 
@@ -51,14 +53,27 @@ export function RecentUploads({ videos }: RecentUploadsProps) {
 
         <TBody>
           {recent.map((video) => (
-            <TR key={video.id}>
+            <TR key={video.id} className="group">
               <TD className="max-w-0">
-                <p className="truncate font-medium text-foreground">
-                  {video.original_filename}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {video.mime_type}
-                </p>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+                      statusIconClasses[video.status],
+                    )}
+                  >
+                    <FileVideo className="h-4 w-4" />
+                  </span>
+
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-foreground">
+                      {video.original_filename}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {video.mime_type}
+                    </p>
+                  </div>
+                </div>
               </TD>
 
               <TD>
@@ -80,7 +95,7 @@ export function RecentUploads({ videos }: RecentUploadsProps) {
                   aria-label={`Open ${video.original_filename}`}
                   className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </TD>
             </TR>

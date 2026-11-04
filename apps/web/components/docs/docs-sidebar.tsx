@@ -19,7 +19,7 @@ export function DocsSidebar({ sections }: DocsSidebarProps) {
         <Link
           key={section.id}
           href={`#${section.id}`}
-          className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent hover:text-accent-foreground"
+          className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           {section.label}
         </Link>

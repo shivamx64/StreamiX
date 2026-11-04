@@ -78,17 +78,22 @@ export function FeaturesSection() {
         </div>
 
         <Stagger className="border-t border-border/70">
-          {features.map((feature) => (
+          {features.map((feature, index) => (
             <StaggerItem key={feature.title}>
               <div className="group flex gap-5 border-b border-border/70 py-8">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <feature.icon className="h-5 w-5" />
                 </span>
 
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-foreground">
-                    {feature.title}
-                  </h3>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="text-lg font-semibold tracking-tight text-foreground transition-transform duration-200 group-hover:translate-x-0.5">
+                      {feature.title}
+                    </h3>
+                    <span className="hidden font-mono text-xs tabular-nums tracking-[0.15em] text-muted-foreground/50 sm:block">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
                   <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
                     {feature.description}
                   </p>

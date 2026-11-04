@@ -22,7 +22,10 @@ export function useVideoStatus(id: string) {
     queryKey: ["videos", id, "status"],
     queryFn: () => videoProcessingService.status(id),
     enabled: Boolean(id),
-    refetchInterval: 5000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "completed" || status === "failed" ? false : 5000;
+    },
   });
 }
 

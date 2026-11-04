@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { ArrowRight, CloudUpload, Cpu, MonitorPlay } from "lucide-react";
 
 import { MarketingSection } from "@/components/shared-ui/marketing/marketing-section";
@@ -50,12 +50,12 @@ export function WorkflowSection() {
 
         {steps.map((step, index) => (
           <StaggerItem key={step.title} className="relative">
-            <div className="flex flex-col items-center text-center">
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-md border border-border bg-card text-primary shadow-sm">
+            <div className="group flex flex-col items-center text-center">
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-lg border border-border bg-card text-primary shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary/30 group-hover:shadow-lg group-hover:shadow-primary/10">
                 <div className="flex h-10 w-10 items-center justify-center">
                   <step.icon className="h-6 w-6" />
                 </div>
-                <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-md bg-primary font-mono text-xs font-semibold text-primary-foreground">
+                <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-md bg-primary font-mono text-xs font-semibold text-primary-foreground shadow-sm">
                   {index + 1}
                 </span>
               </div>

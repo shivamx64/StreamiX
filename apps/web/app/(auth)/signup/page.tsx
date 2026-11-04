@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { CircleAlert } from "lucide-react";
 
 import { AuthEmailField } from "@/components/auth/auth-email-field";
 import { AuthFormCard } from "@/components/auth/auth-form-card";
@@ -61,8 +62,9 @@ export default function SignupPage() {
         {error && (
           <div
             role="alert"
-            className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground"
+            className="flex items-center gap-2.5 rounded-md border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground"
           >
+            <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
             {error}
           </div>
         )}

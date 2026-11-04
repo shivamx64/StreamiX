@@ -7,9 +7,11 @@ export function useVideoUpload() {
     mutationFn: ({
       file,
       callbacks,
+      signal,
     }: {
       file: File;
       callbacks?: UploadCallbacks;
-    }) => uploadService.upload(file, callbacks),
+      signal?: AbortSignal;
+    }) => uploadService.upload(file, callbacks, signal),
   });
 }

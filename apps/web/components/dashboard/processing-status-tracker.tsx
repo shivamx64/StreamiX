@@ -1,9 +1,11 @@
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  Check,
   CheckCircle2,
   Clock,
-  Cpu,
   Loader2,
-  UploadCloud,
   XCircle,
 } from "lucide-react";
 
@@ -24,27 +26,25 @@ const pipelineSteps: Array<{
 
 function stepState(
   status: VideoStatus,
-  stepKey: VideoStatus,
+  stepKey: PipelineStepKey,
 ): "done" | "active" | "pending" | "failed" {
   if (status === "failed") {
     return stepKey === "uploaded" ? "done" : "failed";
   }
 
-  const order = ["uploaded", "queued", "processing", "completed"];
-  const statusIndex = order.indexOf(status);
+  const order: PipelineStepKey[] = [
+    "uploaded",
+    "queued",
+    "processing",
+    "completed",
+  ];
+  const statusIndex = order.indexOf(status as PipelineStepKey);
   const stepIndex = order.indexOf(stepKey);
 
   if (stepIndex < statusIndex) return "done";
   if (stepIndex === statusIndex) return "active";
   return "pending";
 }
-
-const stepIcon = {
-  done: CheckCircle2,
-  active: Loader2,
-  pending: Clock,
-  failed: XCircle,
-};
 
 type ProcessingStatusTrackerProps = {
   status: VideoStatus;
@@ -53,15 +53,17 @@ type ProcessingStatusTrackerProps = {
 export function ProcessingStatusTracker({
   status,
 }: ProcessingStatusTrackerProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
+    <div className="space-y-5">
+      <div className="flex items-center gap-2.5">
         {status === "failed" ? (
-          <XCircle className="h-5 w-5 text-danger-soft-foreground" />
+          <XCircle className="h-5 w-5 text-danger" />
         ) : status === "completed" ? (
-          <CheckCircle2 className="h-5 w-5 text-success-soft-foreground" />
+          <CheckCircle2 className="h-5 w-5 text-success" />
         ) : (
-          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <Loader2 className="h-5 w-5 animate-spin text-processing" />
         )}
         <span className="text-sm font-semibold text-foreground">
           {status === "failed"
@@ -73,51 +75,42 @@ export function ProcessingStatusTracker({
       </div>
 
       <ol className="space-y-0">
-        {pipelineSteps.map((step) => {
+        {pipelineSteps.map((step, index) => {
           const state = stepState(status, step.key);
-          const Icon = stepIcon[state];
+          const isLast = index === pipelineSteps.length - 1;
 
           return (
-            <li key={step.key} className="flex gap-3">
+            <li key={step.key} className="flex gap-3.5">
               <div className="flex flex-col items-center">
-                <div
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-full border",
-                    state === "done" &&
-                      "border-success/30 bg-success-soft text-success-soft-foreground",
-                    state === "active" &&
-                      "border-primary/30 bg-accent text-primary",
-                    state === "pending" &&
-                      "border-border bg-muted text-muted-foreground",
-                    state === "failed" &&
-                      "border-danger/30 bg-danger-soft text-danger-soft-foreground",
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4",
-                      state === "active" && "animate-spin",
-                    )}
-                  />
-                </div>
+                <StepIcon state={state} />
 
-                {step.key !== "completed" && (
-                  <div
-                    className={cn(
-                      "h-8 w-px",
-                      state === "done"
-                        ? "bg-success/40"
-                        : "bg-border",
+                {!isLast && (
+                  <div className="relative my-1 h-6 w-px overflow-hidden bg-border">
+                    {state === "done" && (
+                      <motion.div
+                        className="absolute inset-x-0 top-0 bg-success/60"
+                        initial={reduceMotion ? { height: "100%" } : { height: 0 }}
+                        whileInView={{ height: "100%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.3, delay: index * 0.08 }}
+                      />
                     )}
-                  />
+                  </div>
                 )}
               </div>
 
-              <div className="pb-4">
-                <p className="pt-1.5 text-sm font-medium text-foreground">
+              <div className={cn("pb-5", isLast && "pb-0")}>
+                <p
+                  className={cn(
+                    "pt-1.5 text-sm font-medium",
+                    state === "pending"
+                      ? "text-muted-foreground"
+                      : "text-foreground",
+                  )}
+                >
                   {step.label}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {stepDescription(step.key, state)}
                 </p>
               </div>
@@ -125,23 +118,54 @@ export function ProcessingStatusTracker({
           );
         })}
       </ol>
+    </div>
+  );
+}
 
-      <div className="flex items-center gap-2 rounded-md bg-muted/50 px-4 py-3 text-xs text-muted-foreground">
-        <Cpu className="h-4 w-4 shrink-0" />
-        <UploadCloud className="h-4 w-4 shrink-0" />
-        Status refreshes automatically while processing.
+type StepIconState = "done" | "active" | "pending" | "failed";
+
+function StepIcon({ state }: { state: StepIconState }) {
+  const base =
+    "flex h-8 w-8 items-center justify-center rounded-full border transition-colors";
+
+  if (state === "done") {
+    return (
+      <div className={cn(base, "border-success/30 bg-success-soft text-success-soft-foreground")}>
+        <Check className="h-4 w-4" strokeWidth={3} />
       </div>
+    );
+  }
+
+  if (state === "active") {
+    return (
+      <div className={cn(base, "border-processing/30 bg-processing-soft text-processing-soft-foreground")}>
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    );
+  }
+
+  if (state === "failed") {
+    return (
+      <div className={cn(base, "border-danger/30 bg-danger-soft text-danger-soft-foreground")}>
+        <XCircle className="h-4 w-4" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(base, "border-border bg-muted/60 text-muted-foreground")}>
+      <Clock className="h-4 w-4" />
     </div>
   );
 }
 
 function stepDescription(
   stepKey: PipelineStepKey,
-  state: "done" | "active" | "pending" | "failed",
+  state: StepIconState,
 ): string {
   if (state === "done") return "Complete";
   if (state === "pending") return "Waiting";
-  if (state === "failed") return "Failed";
+  if (state === "failed") return "Failed before completion";
 
   const activeDescriptions: Record<PipelineStepKey, string> = {
     uploaded: "Source video stored",

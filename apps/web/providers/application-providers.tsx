@@ -3,6 +3,8 @@
 import { MotionConfig } from "framer-motion"
 import { ReactNode } from "react"
 
+import { ApplicationToaster } from "@/components/shared-ui/application-toaster"
+
 import { AuthenticationProvider } from "./authentication-provider"
 import { ApplicationQueryProvider } from "./query-client-provider"
 import { ThemeProvider } from "./theme-provider"
@@ -25,6 +27,7 @@ export function ApplicationProviders({
 				<ApplicationQueryProvider>
 					<AuthenticationProvider>
 						{children}
+						<ApplicationToaster />
 					</AuthenticationProvider>
 				</ApplicationQueryProvider>
 			</ThemeProvider>

@@ -16,6 +16,7 @@ export const uploadService = {
   async upload(
     file: File,
     callbacks: UploadCallbacks = {},
+    signal?: AbortSignal,
   ): Promise<UploadResult> {
     const formData = new FormData();
     formData.append("file", file);
@@ -27,6 +28,8 @@ export const uploadService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+
+        signal,
 
         onUploadProgress: (event) => {
           if (!event.total) return;

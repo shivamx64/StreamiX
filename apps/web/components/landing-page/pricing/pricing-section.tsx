@@ -83,10 +83,10 @@ export function PricingSection() {
           <Reveal key={plan.name} delay={index * 0.08} className="h-full">
             <Card
               className={cn(
-                "relative flex h-full flex-col p-8 transition-shadow",
+                "relative flex h-full flex-col p-8 transition-all duration-300",
                 plan.highlighted
-                  ? "border-primary/40 shadow-xl shadow-primary/10 ring-1 ring-primary/20"
-                  : "hover:shadow-md hover:shadow-foreground/5",
+                  ? "border-primary/40 bg-gradient-to-b from-primary/[0.06] via-card to-card shadow-xl shadow-primary/10 ring-1 ring-primary/20"
+                  : "hover:-translate-y-0.5 hover:shadow-md hover:shadow-foreground/5",
               )}
             >
               {plan.highlighted && (
@@ -100,7 +100,7 @@ export function PricingSection() {
               </h3>
 
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-display text-4xl font-semibold tracking-tight text-foreground">
+                <span className="font-display text-4xl font-semibold tabular-nums tracking-tight text-foreground">
                   {plan.price}
                 </span>
                 {plan.period && (

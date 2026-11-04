@@ -13,8 +13,10 @@ import { MetricStrip } from "@/components/dashboard/metric-strip";
 import { RecentUploads } from "@/components/dashboard/recent-uploads";
 import { StatusBreakdown } from "@/components/dashboard/status-breakdown";
 import { VideoLibrary } from "@/components/dashboard/video-library";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/format";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useVideos } from "@/hooks/use-video-processing";
@@ -55,42 +57,34 @@ export default function DashboardHomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground lg:text-4xl">
-            Welcome back{name ? `, ${name}` : ""}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Here&apos;s what&apos;s happening with your videos today.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {!isEmpty && (
-            <Button asChild variant="outline">
-              <Link href="/dashboard/videos">
-                Go to library
-              </Link>
-            </Button>
-          )}
-
-          <Button asChild>
-            <Link href="/dashboard/upload">
-              <Plus className="mr-2 h-4 w-4" />
-              Upload video
+      <DashboardPageHeader
+        title={`Welcome back${name ? `, ${name}` : ""}`}
+        description="Here's what's happening with your videos today."
+      >
+        {!isEmpty && (
+          <Button asChild variant="outline">
+            <Link href="/dashboard/videos">
+              Go to library
             </Link>
           </Button>
-        </div>
-      </section>
+        )}
+
+        <Button asChild>
+          <Link href="/dashboard/upload">
+            <Plus className="mr-2 h-4 w-4" />
+            Upload video
+          </Link>
+        </Button>
+      </DashboardPageHeader>
 
       {isLoading && (
         <section>
           <Card className="grid grid-cols-1 divide-y divide-border/60 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="space-y-3 p-5">
-                <div className="h-3.5 w-24 animate-pulse rounded-md bg-muted" />
-                <div className="h-8 w-16 animate-pulse rounded-md bg-muted" />
-                <div className="h-3 w-32 animate-pulse rounded-md bg-muted" />
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-3 w-32" />
               </div>
             ))}
           </Card>
