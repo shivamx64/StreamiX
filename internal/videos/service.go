@@ -37,6 +37,19 @@ type Service interface {
 		userID string,
 		videoID string,
 	) error
+
+	OpenThumbnail(
+		ctx context.Context,
+		userID string,
+		videoID string,
+	) (*MediaFile, error)
+
+	OpenHLS(
+		ctx context.Context,
+		userID string,
+		videoID string,
+		relativePath string,
+	) (*MediaFile, error)
 }
 
 type service struct {

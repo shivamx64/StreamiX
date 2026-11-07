@@ -104,6 +104,16 @@ func Register(router *gin.Engine, c *container.Container) {
 		c.VideoHandler.Status,
 	)
 
+	videos.GET(
+		"/:id/thumbnail",
+		c.VideoHandler.Thumbnail,
+	)
+
+	videos.GET(
+		"/:id/hls/*path",
+		c.VideoHandler.HLS,
+	)
+
 	videos.DELETE(
 		"/:id",
 		c.VideoHandler.Delete,

@@ -466,6 +466,18 @@ Responds `200` with the processing status, intended for polling:
 
 Possible statuses: `uploaded`, `queued`, `processing`, `completed`, `failed`.
 
+#### Get thumbnail
+
+`GET /api/v1/videos/:id/thumbnail` — authenticated, owner only.
+
+Streams the generated JPEG poster for a completed video. Responds `404` until processing has completed.
+
+#### Stream HLS
+
+`GET /api/v1/videos/:id/hls/*path` — authenticated, owner only.
+
+Streams generated HLS playlists and segments for a completed video. The master playlist is available at `/api/v1/videos/:id/hls/master.m3u8`.
+
 #### Delete video
 
 `DELETE /api/v1/videos/:id` — authenticated, owner only.
