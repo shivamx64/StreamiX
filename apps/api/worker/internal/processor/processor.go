@@ -7,7 +7,9 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/shivamx64/streamix/internal/storage"
 	"github.com/shivamx64/streamix/internal/transcoder"
@@ -51,12 +53,28 @@ func New(
 func (p *Processor) Fail(
 	ctx context.Context,
 	videoID string,
+	cause error,
 ) {
-	if err := p.repo.SetStatus(
+	message := ""
+
+	if cause != nil {
+		message = cause.Error()
+	}
+
+	if err := p.repo.SetFailed(
 		ctx,
 		videoID,
-		videos.StatusFailed,
+		message,
 	); err != nil {
+		if errors.Is(err, videos.ErrInvalidTransition) {
+			p.logger.Info(
+				"skipping failed status for video in a terminal state",
+				"video_id", videoID,
+			)
+
+			return
+		}
+
 		p.logger.Error(
 			"mark video failed",
 			"video_id", videoID,
@@ -75,11 +93,27 @@ func (p *Processor) Process(
 	job videos.Job,
 ) (permanent bool, err error) {
 
-	if err := p.repo.SetStatus(
+	if err := p.repo.TransitionStatus(
 		ctx,
 		job.VideoID,
+		[]videos.Status{
+			videos.StatusQueued,
+			videos.StatusUploaded,
+			// Transient failures leave the video processing so a
+			// redelivered job can resume it.
+			videos.StatusProcessing,
+		},
 		videos.StatusProcessing,
 	); err != nil {
+		if errors.Is(err, videos.ErrInvalidTransition) {
+			p.logger.Info(
+				"skipping job for video that is no longer pending",
+				"video_id", job.VideoID,
+			)
+
+			return true, nil
+		}
+
 		return false, fmt.Errorf("mark video processing: %w", err)
 	}
 
@@ -103,7 +137,7 @@ func (p *Processor) Process(
 		sourcePath,
 	); err != nil {
 		if errors.Is(err, storage.ErrFileNotFound) {
-			p.Fail(ctx, job.VideoID)
+			p.Fail(ctx, job.VideoID, ErrSourceNotFound)
 			return true, ErrSourceNotFound
 		}
 
@@ -113,8 +147,9 @@ func (p *Processor) Process(
 	probe, err := p.transcoder.Probe(ctx, sourcePath)
 	if err != nil {
 		// The uploaded object is not a valid video.
-		p.Fail(ctx, job.VideoID)
-		return true, fmt.Errorf("probe source: %w", err)
+		probeErr := fmt.Errorf("probe source: %w", err)
+		p.Fail(ctx, job.VideoID, probeErr)
+		return true, probeErr
 	}
 
 	destDir := filepath.Join(workDir, "output")
@@ -139,11 +174,30 @@ func (p *Processor) Process(
 		return false, fmt.Errorf("upload outputs: %w", err)
 	}
 
-	if err := p.repo.SetStatus(
+	hlsMasterKey, thumbnailKey := outputKeys(job)
+
+	if err := p.repo.SetCompleted(
 		ctx,
 		job.VideoID,
-		videos.StatusCompleted,
+		videos.ProcessingResult{
+			DurationSeconds: probe.DurationSeconds,
+			Width:           probe.Width,
+			Height:          probe.Height,
+			HLSMasterKey:    hlsMasterKey,
+			ThumbnailKey:    thumbnailKey,
+			Renditions:      toRenditions(output.Renditions),
+			CompletedAt:     time.Now().UTC(),
+		},
 	); err != nil {
+		if errors.Is(err, videos.ErrInvalidTransition) {
+			p.logger.Warn(
+				"discarding completion for video whose status changed",
+				"video_id", job.VideoID,
+			)
+
+			return true, nil
+		}
+
 		return false, fmt.Errorf("mark video completed: %w", err)
 	}
 
@@ -189,7 +243,7 @@ func (p *Processor) uploadOutputs(
 	output *transcoder.Output,
 ) error {
 
-	hlsBase := filepath.Join(
+	hlsBase := path.Join(
 		job.UserID,
 		job.VideoID,
 		"hls",
@@ -197,7 +251,7 @@ func (p *Processor) uploadOutputs(
 
 	err := filepath.WalkDir(
 		output.Root,
-		func(path string, entry os.DirEntry, err error) error {
+		func(localPath string, entry os.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -207,19 +261,19 @@ func (p *Processor) uploadOutputs(
 			}
 
 			// The thumbnail moves to its own key below.
-			if filepath.Clean(path) == filepath.Clean(output.Thumbnail) {
+			if filepath.Clean(localPath) == filepath.Clean(output.Thumbnail) {
 				return nil
 			}
 
-			rel, err := filepath.Rel(output.Root, path)
+			rel, err := filepath.Rel(output.Root, localPath)
 			if err != nil {
 				return err
 			}
 
 			return p.saveFile(
 				ctx,
-				path,
-				filepath.Join(hlsBase, filepath.ToSlash(rel)),
+				localPath,
+				path.Join(hlsBase, filepath.ToSlash(rel)),
 			)
 		},
 	)
@@ -227,15 +281,41 @@ func (p *Processor) uploadOutputs(
 		return err
 	}
 
+	_, thumbnailKey := outputKeys(job)
+
 	if err := p.saveFile(
 		ctx,
 		output.Thumbnail,
-		filepath.Join(job.UserID, job.VideoID, "thumbnail.jpg"),
+		thumbnailKey,
 	); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// outputKeys returns the storage keys for the HLS master and thumbnail.
+func outputKeys(job videos.Job) (string, string) {
+	base := path.Join(job.UserID, job.VideoID)
+
+	return path.Join(base, "hls", "master.m3u8"),
+		path.Join(base, "thumbnail.jpg")
+}
+
+// toRenditions converts transcoder renditions to persisted metadata.
+func toRenditions(renditions []transcoder.Rendition) videos.RenditionList {
+	result := make(videos.RenditionList, 0, len(renditions))
+
+	for _, rendition := range renditions {
+		result = append(result, videos.Rendition{
+			Name:           rendition.Name,
+			Height:         rendition.VideoHeight,
+			VideoBitrateKb: rendition.VideoBitrateKb,
+			AudioBitrateKb: rendition.AudioBitrateKb,
+		})
+	}
+
+	return result
 }
 
 // saveFile copies a local file into storage under the given key.

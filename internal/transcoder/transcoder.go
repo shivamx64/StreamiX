@@ -121,8 +121,8 @@ func (t *Transcoder) Probe(
 
 // Rendition describes a single HLS output variant.
 type Rendition struct {
-	Name          string
-	VideoHeight   int
+	Name           string
+	VideoHeight    int
 	VideoBitrateKb int
 	AudioBitrateKb int
 }
@@ -160,6 +160,9 @@ type Output struct {
 
 	// Thumbnail is the absolute path to the generated poster image.
 	Thumbnail string
+
+	// Renditions are the HLS variants that were generated.
+	Renditions []Rendition
 }
 
 // Transcode converts the input into adaptive HLS renditions and
@@ -224,6 +227,7 @@ func (t *Transcoder) Transcode(
 		Root:           destDir,
 		MasterPlaylist: master,
 		Thumbnail:      thumbnail,
+		Renditions:     renditions,
 	}, nil
 }
 

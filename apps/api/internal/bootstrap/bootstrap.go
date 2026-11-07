@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/shivamx64/streamix/apps/api/internal/container"
 	"github.com/shivamx64/streamix/apps/api/internal/routes"
 	"github.com/shivamx64/streamix/internal/auth"
@@ -15,7 +16,6 @@ import (
 	"github.com/shivamx64/streamix/internal/queue"
 	"github.com/shivamx64/streamix/internal/storage"
 	"github.com/shivamx64/streamix/internal/videos"
-	"github.com/redis/go-redis/v9"
 )
 
 type Application struct {
@@ -70,9 +70,9 @@ func New() (*Application, error) {
 		sessionStore = auth.NewRedisRefreshSessionStore(sessionClient)
 	}
 
-	// The job queue publishes transcoding work for workers.
-	// Fall back to a no-op queue when redis is unavailable so the
-	// upload flow keeps working without the worker infrastructure.
+	// The job queue publishes transcoding work for workers. When redis
+	// is unavailable the upload endpoint fails explicitly rather than
+	// persisting videos that can never be processed.
 	var jobQueue videos.JobQueue
 
 	streams, err := queue.New(

@@ -3,6 +3,7 @@ package videos
 import (
 	"context"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -20,9 +21,11 @@ func TestUploadSuccess(t *testing.T) {
 
 	userID := mustUUIDString()
 
-	repo := &mockRepository{}
+	events := []string{}
+
+	repo := &mockRepository{events: &events}
 	store := &mockStorage{}
-	queue := &mockQueue{}
+	queue := &mockQueue{events: &events}
 
 	service := newTestService(repo, store, queue)
 
@@ -73,9 +76,22 @@ func TestUploadSuccess(t *testing.T) {
 		t.Errorf("enqueued StorageKey = %q, want %q", enqueued.StorageKey, video.StorageKey)
 	}
 
-	// Qued transition must be persisted.
-	if len(repo.setStatuses) != 1 || repo.setStatuses[0] != StatusQueued {
-		t.Errorf("SetStatus() calls = %v, want [%q]", repo.setStatuses, StatusQueued)
+	if len(repo.transitions) != 1 {
+		t.Fatalf("TransitionStatus() calls = %v, want 1", repo.transitions)
+	}
+
+	transition := repo.transitions[0]
+	if !reflect.DeepEqual(transition.from, []Status{StatusUploaded}) {
+		t.Errorf("TransitionStatus() from = %v, want [%q]", transition.from, StatusUploaded)
+	}
+
+	if transition.to != StatusQueued {
+		t.Errorf("TransitionStatus() to = %q, want %q", transition.to, StatusQueued)
+	}
+
+	// The status must be committed before the worker can observe the job.
+	if want := []string{"transition", "enqueue"}; !reflect.DeepEqual(events, want) {
+		t.Errorf("upload events = %v, want %v", events, want)
 	}
 }
 
@@ -110,12 +126,13 @@ func TestUploadRollsBackFileOnRepositoryFailure(t *testing.T) {
 	}
 }
 
-func TestUploadRemainsUploadedWhenQueueFails(t *testing.T) {
+func TestUploadRollsBackWhenQueueFails(t *testing.T) {
 	ctx := context.Background()
 
 	userID := mustUUIDString()
 
-	repo := &mockRepository{}
+	created := &Video{}
+	repo := &mockRepository{created: created}
 	store := &mockStorage{}
 	queue := &mockQueue{enqueueErr: errBoom}
 
@@ -128,16 +145,97 @@ func TestUploadRemainsUploadedWhenQueueFails(t *testing.T) {
 		"video/mp4",
 		strings.NewReader("bytes"),
 	)
-	if err != nil {
-		t.Fatalf("Upload() error = %v", err)
+	if video != nil {
+		t.Fatalf("Upload() video = %#v, want nil", video)
 	}
 
-	if video.Status != StatusUploaded {
-		t.Errorf("Status = %q, want %q (must not queue when publish fails)", video.Status, StatusUploaded)
+	if !errors.Is(err, ErrQueueUnavailable) {
+		t.Fatalf("Upload() error = %v, want ErrQueueUnavailable", err)
 	}
 
-	if len(repo.setStatuses) != 0 {
-		t.Errorf("SetStatus() called %d times, want 0", len(repo.setStatuses))
+	if !errors.Is(err, errBoom) {
+		t.Fatalf("Upload() error = %v, want wrapped errBoom", err)
+	}
+
+	if repo.deletedID != created.ID.String() {
+		t.Errorf("rollback deleted record %q, want %q", repo.deletedID, created.ID)
+	}
+
+	if store.deletedKey != created.StorageKey {
+		t.Errorf("rollback deleted object %q, want %q", store.deletedKey, created.StorageKey)
+	}
+}
+
+func TestUploadFailsWhenQueueUnavailable(t *testing.T) {
+	ctx := context.Background()
+
+	repo := &mockRepository{}
+	store := &mockStorage{}
+
+	service := newTestService(repo, store, nil)
+
+	video, err := service.Upload(
+		ctx,
+		mustUUIDString(),
+		"clip.mp4",
+		"video/mp4",
+		strings.NewReader("bytes"),
+	)
+	if video != nil {
+		t.Fatalf("Upload() video = %#v, want nil", video)
+	}
+
+	if !errors.Is(err, ErrQueueUnavailable) {
+		t.Fatalf("Upload() error = %v, want ErrQueueUnavailable", err)
+	}
+
+	if len(store.savedKeys) != 0 {
+		t.Errorf("storage.Save() called %d times, want 0", len(store.savedKeys))
+	}
+
+	if repo.created != nil {
+		t.Error("repository.Create() was called without a queue")
+	}
+}
+
+func TestUploadRollsBackWhenQueueTransitionFails(t *testing.T) {
+	ctx := context.Background()
+
+	created := &Video{}
+	repo := &mockRepository{
+		created:       created,
+		transitionErr: errBoom,
+	}
+	store := &mockStorage{}
+	queue := &mockQueue{}
+
+	service := newTestService(repo, store, queue)
+
+	video, err := service.Upload(
+		ctx,
+		mustUUIDString(),
+		"clip.mp4",
+		"video/mp4",
+		strings.NewReader("bytes"),
+	)
+	if video != nil {
+		t.Fatalf("Upload() video = %#v, want nil", video)
+	}
+
+	if !errors.Is(err, errBoom) {
+		t.Fatalf("Upload() error = %v, want errBoom", err)
+	}
+
+	if repo.deletedID != created.ID.String() {
+		t.Errorf("rollback deleted record %q, want %q", repo.deletedID, created.ID)
+	}
+
+	if store.deletedKey != created.StorageKey {
+		t.Errorf("rollback deleted object %q, want %q", store.deletedKey, created.StorageKey)
+	}
+
+	if len(queue.enqueued) != 0 {
+		t.Errorf("queue.Enqueue() called %d times after transition failure", len(queue.enqueued))
 	}
 }
 

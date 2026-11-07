@@ -2,6 +2,8 @@ package videos
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"path/filepath"
 
@@ -65,6 +67,10 @@ func (s *service) Upload(
 	reader io.Reader,
 ) (*Video, error) {
 
+	if s.queue == nil {
+		return nil, ErrQueueUnavailable
+	}
+
 	video := &Video{
 		ID:               uuid.New(),
 		UserID:           uuid.MustParse(userID),
@@ -93,27 +99,92 @@ func (s *service) Upload(
 	err = s.repository.Create(ctx, video)
 	if err != nil {
 		// Roll back the stored file so we do not leak orphaned objects.
-		_ = s.storage.Delete(ctx, video.StorageKey)
+		rollbackErr := s.storage.Delete(ctx, video.StorageKey)
+
+		if rollbackErr != nil && !errors.Is(rollbackErr, storage.ErrFileNotFound) {
+			return nil, errors.Join(
+				err,
+				fmt.Errorf("roll back stored object: %w", rollbackErr),
+			)
+		}
+
 		return nil, err
 	}
 
-	// Queue the video for transcoding. A temporary failure to publish
-	// is non-fatal so the upload itself still succeeds; the video
-	// remains in the uploaded state until retried.
-	if s.queue != nil {
-		err = s.queue.Enqueue(ctx, Job{
-			VideoID:    video.ID.String(),
-			UserID:     userID,
-			StorageKey: video.StorageKey,
-			Filename:   video.OriginalFilename,
-		})
-		if err == nil {
-			video.Status = StatusQueued
-			_ = s.repository.SetStatus(ctx, video.ID.String(), StatusQueued)
-		}
+	// Mark the video queued before publishing. This keeps the worker
+	// from observing an uploaded record and lets a fast worker finish
+	// processing without a late status update overwriting it.
+	if err := s.repository.TransitionStatus(
+		ctx,
+		video.ID.String(),
+		[]Status{StatusUploaded},
+		StatusQueued,
+	); err != nil {
+		return nil, s.rollbackUpload(
+			ctx,
+			video,
+			fmt.Errorf("mark video queued: %w", err),
+		)
+	}
+
+	video.Status = StatusQueued
+
+	if err := s.queue.Enqueue(ctx, Job{
+		VideoID:    video.ID.String(),
+		UserID:     userID,
+		StorageKey: video.StorageKey,
+		Filename:   video.OriginalFilename,
+	}); err != nil {
+		return nil, s.rollbackUpload(
+			ctx,
+			video,
+			errors.Join(
+				ErrQueueUnavailable,
+				fmt.Errorf("enqueue video: %w", err),
+			),
+		)
 	}
 
 	return video, nil
+}
+
+// rollbackUpload removes the video record and stored source after a
+// failed upload, preserving the original failure for error matching.
+func (s *service) rollbackUpload(
+	ctx context.Context,
+	video *Video,
+	cause error,
+) error {
+
+	var rollbackErrors []error
+
+	if err := s.repository.Delete(
+		ctx,
+		video.ID.String(),
+	); err != nil {
+		rollbackErrors = append(
+			rollbackErrors,
+			fmt.Errorf("delete video record: %w", err),
+		)
+	}
+
+	if err := s.storage.Delete(
+		ctx,
+		video.StorageKey,
+	); err != nil && !errors.Is(err, storage.ErrFileNotFound) {
+		rollbackErrors = append(
+			rollbackErrors,
+			fmt.Errorf("delete stored object: %w", err),
+		)
+	}
+
+	if len(rollbackErrors) == 0 {
+		return cause
+	}
+
+	return errors.Join(
+		append([]error{cause}, rollbackErrors...)...,
+	)
 }
 
 // ListByUser returns all videos belonging to a user.

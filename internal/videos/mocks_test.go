@@ -9,18 +9,36 @@ import (
 	"github.com/shivamx64/streamix/internal/storage"
 )
 
+type statusTransition struct {
+	from []Status
+	to   Status
+}
+
 // mockRepository is a configurable in-memory Repository.
 type mockRepository struct {
-	createErr    error
-	created      *Video
-	findByIDErr  error
-	findResult   *Video
-	listResult   []Video
-	listErr      error
-	setStatuses  []Status
-	setStatusErr error
-	deleteErr    error
-	deletedID    string
+	createErr       error
+	created         *Video
+	findByIDErr     error
+	findResult      *Video
+	listResult      []Video
+	listErr         error
+	transitions     []statusTransition
+	transitionErr   error
+	completedID     string
+	completedResult ProcessingResult
+	completedErr    error
+	failedID        string
+	failedMessage   string
+	failedErr       error
+	deleteErr       error
+	deletedID       string
+	events          *[]string
+}
+
+func (m *mockRepository) recordEvent(event string) {
+	if m.events != nil {
+		*m.events = append(*m.events, event)
+	}
 }
 
 func (m *mockRepository) Create(ctx context.Context, video *Video) error {
@@ -38,9 +56,31 @@ func (m *mockRepository) ListByUser(ctx context.Context, userID string) ([]Video
 	return m.listResult, m.listErr
 }
 
-func (m *mockRepository) SetStatus(ctx context.Context, id string, status Status) error {
-	m.setStatuses = append(m.setStatuses, status)
-	return m.setStatusErr
+func (m *mockRepository) TransitionStatus(
+	ctx context.Context,
+	id string,
+	from []Status,
+	to Status,
+) error {
+	m.transitions = append(m.transitions, statusTransition{
+		from: append([]Status(nil), from...),
+		to:   to,
+	})
+	m.recordEvent("transition")
+
+	return m.transitionErr
+}
+
+func (m *mockRepository) SetCompleted(ctx context.Context, id string, result ProcessingResult) error {
+	m.completedID = id
+	m.completedResult = result
+	return m.completedErr
+}
+
+func (m *mockRepository) SetFailed(ctx context.Context, id string, processingError string) error {
+	m.failedID = id
+	m.failedMessage = processingError
+	return m.failedErr
 }
 
 func (m *mockRepository) Delete(ctx context.Context, id string) error {
@@ -102,10 +142,16 @@ func (emptyReader) Read([]byte) (int, error) {
 type mockQueue struct {
 	enqueueErr error
 	enqueued   []Job
+	events     *[]string
 }
 
 func (m *mockQueue) Enqueue(ctx context.Context, job Job) error {
 	m.enqueued = append(m.enqueued, job)
+
+	if m.events != nil {
+		*m.events = append(*m.events, "enqueue")
+	}
+
 	return m.enqueueErr
 }
 

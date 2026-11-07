@@ -4,15 +4,23 @@ import "time"
 
 // VideoResponse represents video data returned by the API.
 type VideoResponse struct {
-	ID               string    `json:"id"`
-	UserID           string    `json:"user_id"`
-	OriginalFilename string    `json:"original_filename"`
-	StorageKey       string    `json:"storage_key"`
-	MimeType         string    `json:"mime_type"`
-	Size             int64     `json:"size"`
-	Status           Status    `json:"status"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	ID               string        `json:"id"`
+	UserID           string        `json:"user_id"`
+	OriginalFilename string        `json:"original_filename"`
+	StorageKey       string        `json:"storage_key"`
+	MimeType         string        `json:"mime_type"`
+	Size             int64         `json:"size"`
+	Status           Status        `json:"status"`
+	DurationSeconds  float64       `json:"duration_seconds"`
+	Width            int           `json:"width"`
+	Height           int           `json:"height"`
+	HLSMasterKey     string        `json:"hls_master_key"`
+	ThumbnailKey     string        `json:"thumbnail_key"`
+	Renditions       RenditionList `json:"renditions"`
+	ProcessingError  string        `json:"processing_error"`
+	CompletedAt      *time.Time    `json:"completed_at"`
+	CreatedAt        time.Time     `json:"created_at"`
+	UpdatedAt        time.Time     `json:"updated_at"`
 }
 
 // VideoStatusResponse represents the processing status of a video.
@@ -23,6 +31,11 @@ type VideoStatusResponse struct {
 
 // toResponse converts a Video model to its API response representation.
 func toResponse(video *Video) VideoResponse {
+	renditions := video.Renditions
+	if renditions == nil {
+		renditions = RenditionList{}
+	}
+
 	return VideoResponse{
 		ID:               video.ID.String(),
 		UserID:           video.UserID.String(),
@@ -31,6 +44,14 @@ func toResponse(video *Video) VideoResponse {
 		MimeType:         video.MimeType,
 		Size:             video.Size,
 		Status:           video.Status,
+		DurationSeconds:  video.DurationSeconds,
+		Width:            video.Width,
+		Height:           video.Height,
+		HLSMasterKey:     video.HLSMasterKey,
+		ThumbnailKey:     video.ThumbnailKey,
+		Renditions:       renditions,
+		ProcessingError:  video.ProcessingError,
+		CompletedAt:      video.CompletedAt,
 		CreatedAt:        video.CreatedAt,
 		UpdatedAt:        video.UpdatedAt,
 	}

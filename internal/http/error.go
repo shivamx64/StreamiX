@@ -59,6 +59,16 @@ func Conflict(ctx *gin.Context, message string) {
 	JSONError(ctx, nethttp.StatusConflict, "CONFLICT", message)
 }
 
+// ServiceUnavailable writes a 503 response.
+func ServiceUnavailable(ctx *gin.Context, message string) {
+	JSONError(
+		ctx,
+		nethttp.StatusServiceUnavailable,
+		"SERVICE_UNAVAILABLE",
+		message,
+	)
+}
+
 // InternalServerError writes a 500 response.
 func InternalServerError(ctx *gin.Context) {
 	JSONError(

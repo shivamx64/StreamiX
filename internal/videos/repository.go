@@ -21,10 +21,23 @@ type Repository interface {
 		userID string,
 	) ([]Video, error)
 
-	SetStatus(
+	TransitionStatus(
 		ctx context.Context,
 		id string,
-		status Status,
+		from []Status,
+		to Status,
+	) error
+
+	SetCompleted(
+		ctx context.Context,
+		id string,
+		result ProcessingResult,
+	) error
+
+	SetFailed(
+		ctx context.Context,
+		id string,
+		processingError string,
 	) error
 
 	Delete(
@@ -102,19 +115,88 @@ func (r *repository) ListByUser(
 	return videos, nil
 }
 
-// SetStatus updates the processing status of a video.
-func (r *repository) SetStatus(
+// TransitionStatus atomically changes a video's status when it currently
+// has one of the allowed source statuses.
+func (r *repository) TransitionStatus(
 	ctx context.Context,
 	id string,
-	status Status,
+	from []Status,
+	to Status,
 ) error {
 
-	return r.db.
+	result := r.db.
 		WithContext(ctx).
 		Model(&Video{}).
-		Where("id = ?", id).
-		Update("status", status).
-		Error
+		Where("id = ? AND status IN ?", id, from).
+		Update("status", to)
+
+	return requireAffectedRow(result)
+}
+
+// SetCompleted persists transcode outputs and marks the video completed.
+// It only applies while the video is processing so stale jobs cannot
+// overwrite a terminal state.
+func (r *repository) SetCompleted(
+	ctx context.Context,
+	id string,
+	result ProcessingResult,
+) error {
+
+	update := r.db.
+		WithContext(ctx).
+		Model(&Video{}).
+		Where("id = ? AND status = ?", id, StatusProcessing).
+		Updates(map[string]any{
+			"status":           StatusCompleted,
+			"duration_seconds": result.DurationSeconds,
+			"width":            result.Width,
+			"height":           result.Height,
+			"hls_master_key":   result.HLSMasterKey,
+			"thumbnail_key":    result.ThumbnailKey,
+			"renditions":       result.Renditions,
+			"processing_error": nil,
+			"completed_at":     result.CompletedAt,
+		})
+
+	return requireAffectedRow(update)
+}
+
+// SetFailed marks the video failed and records the processing error.
+// It only applies to queued or processing videos.
+func (r *repository) SetFailed(
+	ctx context.Context,
+	id string,
+	processingError string,
+) error {
+
+	update := r.db.
+		WithContext(ctx).
+		Model(&Video{}).
+		Where("id = ? AND status IN ?", id, []Status{
+			StatusQueued,
+			StatusProcessing,
+		}).
+		Updates(map[string]any{
+			"status":           StatusFailed,
+			"processing_error": processingError,
+			"completed_at":     nil,
+		})
+
+	return requireAffectedRow(update)
+}
+
+// requireAffectedRow reports a transition conflict when no record matched
+// the guarded update.
+func requireAffectedRow(result *gorm.DB) error {
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return ErrInvalidTransition
+	}
+
+	return nil
 }
 
 // Delete removes a video record by its ID.

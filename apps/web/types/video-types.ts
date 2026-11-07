@@ -5,6 +5,13 @@ export type VideoStatus =
   | "completed"
   | "failed";
 
+export type VideoRendition = {
+  name: string;
+  height: number;
+  video_bitrate_kb: number;
+  audio_bitrate_kb: number;
+};
+
 export type Video = {
   id: string;
   user_id: string;
@@ -13,6 +20,14 @@ export type Video = {
   mime_type: string;
   size: number;
   status: VideoStatus;
+  duration_seconds: number;
+  width: number;
+  height: number;
+  hls_master_key: string;
+  thumbnail_key: string;
+  renditions: VideoRendition[];
+  processing_error: string;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
 };

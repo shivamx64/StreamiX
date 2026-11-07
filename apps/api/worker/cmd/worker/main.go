@@ -153,7 +153,7 @@ func handleMessage(
 	}
 
 	if time.Since(message.PublishedAt) > maxJobAge {
-		proc.Fail(ctx, job.VideoID)
+		proc.Fail(ctx, job.VideoID, err)
 
 		log.Error(
 			"job exceeded retry window",

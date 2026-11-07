@@ -63,6 +63,11 @@ func (h *Handler) Upload(ctx *gin.Context) {
 		switch {
 		case errors.Is(err, ErrInvalidVideo):
 			apphttp.BadRequest(ctx, "invalid video file")
+		case errors.Is(err, ErrQueueUnavailable):
+			apphttp.ServiceUnavailable(
+				ctx,
+				"video processing queue is unavailable; please retry",
+			)
 		default:
 			apphttp.InternalServerError(ctx)
 		}
