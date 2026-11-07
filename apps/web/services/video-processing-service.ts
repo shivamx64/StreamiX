@@ -40,6 +40,15 @@ export const videoProcessingService = {
     return data.data;
   },
 
+  async thumbnail(id: string): Promise<Blob> {
+    const { data } = await apiClient.get<Blob>(
+      apiEndpoints.videos.thumbnail(id),
+      { responseType: "blob" },
+    );
+
+    return data;
+  },
+
   async remove(id: string): Promise<void> {
     await apiClient.delete(apiEndpoints.videos.delete(id));
   },
