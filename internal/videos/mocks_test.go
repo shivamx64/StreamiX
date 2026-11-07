@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/shivamx64/streamix/internal/storage"
@@ -90,11 +91,14 @@ func (m *mockRepository) Delete(ctx context.Context, id string) error {
 
 // mockStorage is a configurable in-memory Storage.
 type mockStorage struct {
-	saveFile   *storage.File
-	saveErr    error
-	savedKeys  []string
-	deleteErr  error
-	deletedKey string
+	saveFile    *storage.File
+	saveErr     error
+	savedKeys   []string
+	openContent string
+	openErr     error
+	openedKey   string
+	deleteErr   error
+	deletedKey  string
 }
 
 func (m *mockStorage) Save(ctx context.Context, key string, reader io.Reader) (*storage.File, error) {
@@ -119,7 +123,13 @@ func (m *mockStorage) Save(ctx context.Context, key string, reader io.Reader) (*
 }
 
 func (m *mockStorage) Open(ctx context.Context, key string) (io.ReadCloser, error) {
-	return io.NopCloser(emptyReader{}), nil
+	m.openedKey = key
+
+	if m.openErr != nil {
+		return nil, m.openErr
+	}
+
+	return io.NopCloser(strings.NewReader(m.openContent)), nil
 }
 
 func (m *mockStorage) Delete(ctx context.Context, key string) error {
@@ -130,12 +140,6 @@ func (m *mockStorage) Delete(ctx context.Context, key string) error {
 	}
 
 	return nil
-}
-
-type emptyReader struct{}
-
-func (emptyReader) Read([]byte) (int, error) {
-	return 0, io.EOF
 }
 
 // mockQueue is a configurable JobQueue.
