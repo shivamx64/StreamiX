@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 
 import { ProcessingStatusTracker } from "@/components/dashboard/processing-status-tracker";
+import { VideoPlayer } from "@/components/dashboard/video-player";
 import { VideoStatusBadge } from "@/components/dashboard/video-status-badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -150,23 +151,27 @@ export default function VideoDetailPage() {
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
             <div className="space-y-6">
               <Card className="overflow-hidden">
-                <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-muted via-accent/60 to-muted">
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"
-                  />
+                {status === "completed" ? (
+                  <VideoPlayer key={video.id} video={video} />
+                ) : (
+                  <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-muted via-accent/60 to-muted">
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20"
+                    />
 
-                  <div className="relative flex flex-col items-center gap-3 text-center">
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-sm backdrop-blur-sm">
-                      <Play className="ml-0.5 h-6 w-6" />
-                    </span>
-                    <p className="px-6 text-xs font-medium text-muted-foreground">
-                      {status === "completed"
-                        ? "Playback arrives with the HLS serving milestone"
-                        : "Preview available once processing completes"}
-                    </p>
+                    <div className="relative flex flex-col items-center gap-3 text-center">
+                      <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-sm backdrop-blur-sm">
+                        <Play className="ml-0.5 h-6 w-6" />
+                      </span>
+                      <p className="px-6 text-xs font-medium text-muted-foreground">
+                        {status === "failed"
+                          ? "This video could not be processed."
+                          : "Preview available once processing completes"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </Card>
 
               <Card className="p-6">

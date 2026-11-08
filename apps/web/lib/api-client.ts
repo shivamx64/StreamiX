@@ -28,6 +28,10 @@ function readStoredTokens(): StoredTokens | null {
 	}
 }
 
+export function getAccessToken(): string | null {
+	return readStoredTokens()?.accessToken ?? null
+}
+
 function writeStoredTokens(tokens: StoredTokens) {
 	window.localStorage.setItem(
 		TOKEN_STORAGE_KEY,

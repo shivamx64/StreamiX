@@ -87,7 +87,7 @@ A Next.js App Router application with three route groups:
 - `(auth)` — login and signup
 - `(authentication)/(dashboard)` — the protected dashboard: overview, upload, video library, and video detail pages
 
-Server state is managed with TanStack Query; authentication state lives in a React context backed by localStorage and an axios request interceptor that attaches the Bearer token. Forms use react-hook-form with zod validation, uploads use react-dropzone, and video status is polled every five seconds.
+Server state is managed with TanStack Query; authentication state lives in a React context backed by localStorage and an axios request interceptor that attaches the Bearer token. Forms use react-hook-form with zod validation, uploads use react-dropzone, and video status is polled every five seconds. Completed videos play through an hls.js player that attaches the current Bearer token to HLS manifest and segment requests, while thumbnails are fetched as authenticated blobs.
 
 ### Backend
 
@@ -129,6 +129,7 @@ The API and worker are independent processes that only share the database, stora
 | Framework | Next.js 16 (App Router), React 19, TypeScript |
 | Styling | Tailwind CSS v4, shadcn-style primitives built on radix slots |
 | Server state | TanStack Query |
+| Video playback | hls.js |
 | Forms | react-hook-form + zod |
 | Uploads | react-dropzone |
 | Auth state | React context + axios interceptors |
@@ -514,7 +515,7 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 
 The following milestones follow naturally from the current implementation:
 
-1. **HLS serving** — an endpoint that serves the generated `hls/` output (playlists, segments, thumbnails) with auth, plus an in-dashboard video player. This makes the transcoding pipeline end-to-end usable.
+1. **Signed playback URLs** — short-lived, video-scoped tokens so native HLS players and plain media URLs can load protected output without per-request Authorization headers.
 2. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
 3. **Containerized development** — Docker Compose for PostgreSQL, Redis, API, worker, and web, with the FFmpeg binaries baked into the worker image.
 4. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.

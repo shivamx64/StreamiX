@@ -18,5 +18,11 @@ export const apiEndpoints = {
 		delete: (id: string) => `/videos/${id}`,
 		status: (id: string) =>
 			`/videos/${id}/status`,
+
+		thumbnail: (id: string) =>
+			`/videos/${id}/thumbnail`,
+
+		hls: (id: string) =>
+			`/videos/${id}/hls/master.m3u8`,
 	},
 }
