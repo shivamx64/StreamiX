@@ -7,26 +7,11 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/class-name";
 
 export const navigationItems = [
-  {
-    label: "Features",
-    href: "#features",
-  },
-  {
-    label: "How it works",
-    href: "#how-it-works",
-  },
-  {
-    label: "Pricing",
-    href: "#pricing",
-  },
-  {
-    label: "FAQ",
-    href: "#faq",
-  },
-  {
-    label: "Docs",
-    href: "/docs",
-  },
+  { label: "Product", href: "/#product" },
+  { label: "Pipeline", href: "/#pipeline" },
+  { label: "Architecture", href: "/#architecture" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Docs", href: "/docs" },
 ];
 
 export function NavigationLinks() {
@@ -38,7 +23,7 @@ export function NavigationLinks() {
 
     const ids = navigationItems
       .map((item) =>
-        item.href.startsWith("#") ? item.href.slice(1) : null,
+        item.href.startsWith("/#") ? item.href.slice(2) : null,
       )
       .filter((id): id is string => Boolean(id));
 
@@ -48,22 +33,26 @@ export function NavigationLinks() {
 
     if (sections.length === 0) return;
 
-    const onScroll = () => {
+    const updateActiveSection = () => {
       let current = "";
+
       for (const section of sections) {
-        if (section.getBoundingClientRect().top <= 120) {
+        if (section.getBoundingClientRect().top <= 160) {
           current = `#${section.id}`;
         }
       }
+
       setActiveSection(current);
     };
 
-    const frame = requestAnimationFrame(onScroll);
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const frame = requestAnimationFrame(updateActiveSection);
+    window.addEventListener("scroll", updateActiveSection, {
+      passive: true,
+    });
 
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", updateActiveSection);
     };
   }, [pathname]);
 
@@ -73,10 +62,10 @@ export function NavigationLinks() {
       className="hidden items-center gap-1 md:flex"
     >
       {navigationItems.map((item) => {
-        const isAnchor = item.href.startsWith("#");
+        const isAnchor = item.href.startsWith("/#");
         const isActive =
           pathname === "/"
-            ? isAnchor && item.href === activeSection
+            ? isAnchor && item.href.slice(1) === activeSection
             : !isAnchor && pathname.startsWith(item.href);
 
         return (
@@ -85,8 +74,8 @@ export function NavigationLinks() {
             href={item.href}
             aria-current={isActive ? "true" : undefined}
             className={cn(
-              "relative rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-              "after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-200 after:ease-out-expo hover:after:scale-x-100",
+              "relative rounded-md px-3 py-2 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground transition-colors hover:text-foreground",
+              "after:absolute after:bottom-1 after:left-3 after:right-3 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 after:ease-out-expo hover:after:scale-x-100",
               isActive && "text-foreground after:scale-x-100",
             )}
           >

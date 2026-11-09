@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/class-name";
 
+import { MarketingContainer } from "./marketing-container";
+
 type MarketingSectionProps = {
   id?: string;
   className?: string;
@@ -16,14 +18,9 @@ export function MarketingSection({
   return (
     <section
       id={id}
-      className={cn(
-        "relative py-24 md:py-32",
-        className,
-      )}
+      className={cn("relative py-20 md:py-28 lg:py-32", className)}
     >
-      <div className="mx-auto w-full max-w-7xl px-6 md:px-10 lg:px-12">
-        {children}
-      </div>
+      <MarketingContainer>{children}</MarketingContainer>
     </section>
   );
 }

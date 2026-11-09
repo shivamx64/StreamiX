@@ -12,7 +12,7 @@ export function MarketingSectionHeading({
   return (
     <h1
       className={cn(
-        "font-display text-balance text-5xl font-semibold leading-[1.02] tracking-tight text-foreground md:text-6xl lg:text-7xl",
+        "font-display text-balance text-[2.75rem] font-semibold leading-[0.98] tracking-[-0.045em] text-foreground sm:text-6xl md:text-7xl lg:text-[5.25rem]",
         className,
       )}
     >

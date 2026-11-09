@@ -12,14 +12,11 @@ export function MarketingSectionBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-sm border border-primary/20 bg-primary/10 px-3 py-1 font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent-foreground",
+        "inline-flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground",
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className="h-1.5 w-1.5 rounded-full bg-primary"
-      />
+      <span aria-hidden="true" className="h-px w-8 bg-primary" />
       {children}
     </span>
   );

@@ -8,6 +8,7 @@ type MarketingSectionHeaderProps = {
   description?: string;
   align?: "center" | "left";
   className?: string;
+  titleClassName?: string;
 };
 
 export function MarketingSectionHeader({
@@ -16,6 +17,7 @@ export function MarketingSectionHeader({
   description,
   align = "center",
   className,
+  titleClassName,
 }: MarketingSectionHeaderProps) {
   return (
     <div
@@ -27,16 +29,13 @@ export function MarketingSectionHeader({
         className,
       )}
     >
-      {badge && (
-        <MarketingSectionBadge>
-          {badge}
-        </MarketingSectionBadge>
-      )}
+      {badge && <MarketingSectionBadge>{badge}</MarketingSectionBadge>}
 
       <h2
         className={cn(
-          "font-display max-w-3xl text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl",
-          badge && "mt-6",
+          "font-display max-w-3xl text-balance text-3xl font-semibold tracking-[-0.035em] text-foreground md:text-4xl lg:text-[2.9rem] lg:leading-[1.08]",
+          badge && "mt-5",
+          titleClassName,
         )}
       >
         {title}

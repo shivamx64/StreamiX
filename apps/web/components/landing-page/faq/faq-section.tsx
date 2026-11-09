@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { ArrowUpRight, GitBranch, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { MarketingSection } from "@/components/shared-ui/marketing/marketing-section";
@@ -10,34 +11,39 @@ import { cn } from "@/lib/class-name";
 
 const faqs = [
   {
-    question: "What video formats can I upload?",
+    question: "What exactly does StreamiX handle?",
     answer:
-      "StreamiX accepts common container formats including MP4, MOV, MKV, and WebM. Every upload is probed automatically and transcoded into a standardized HLS output.",
+      "StreamiX is a self-hosted video processing pipeline. It accepts uploads, stores the source, queues a transcoding job over Redis Streams, runs FFprobe and FFmpeg in a Go worker, and exposes the resulting HLS playlists and thumbnail through the API and dashboard.",
   },
   {
-    question: "How does distributed transcoding work?",
+    question: "Which source files can I upload?",
     answer:
-      "Uploads are pushed onto a Redis-backed job queue, where a fleet of worker services pick them up and run FFmpeg jobs in parallel. Jobs fan out across workers so large batches finish in minutes, not hours.",
+      "The dashboard accepts MP4, WebM, and MOV files. The API enforces a 2 GB upload limit. Each source is probed before transcoding, and the rendition ladder adapts to the source resolution instead of upscaling.",
   },
   {
-    question: "What streaming outputs do you generate?",
+    question: "What does the pipeline produce?",
     answer:
-      "We generate adaptive bitrate HLS playlists with multiple resolutions — typically 480p, 720p, and 1080p — so playback adapts to each viewer's connection in real time.",
+      "A master HLS playlist with 1080p, 720p, and 480p variants when the source supports them, plus a 240p fallback for low-resolution sources. It also generates a JPEG thumbnail from the video.",
   },
   {
-    question: "How long does processing take?",
+    question: "How does authenticated playback work?",
     answer:
-      "It depends on the source file, but most videos complete in under a minute thanks to parallel worker pools. You can watch progress live in the dashboard.",
+      "HLS playlists and segments are streamed by the API through per-user routes. The route resolves the video against the authenticated session before reading media from storage. The dashboard player uses hls.js and attaches the bearer token to manifest and segment requests.",
   },
   {
-    question: "Is my content secure?",
+    question: "Where is media stored?",
     answer:
-      "Yes. Accounts are protected with JWT authentication, files live in private object storage, and only you can access your library and generated streams.",
+      "On the local filesystem by default, namespaced by user and video. Storage is behind an interface, but an S3-compatible driver is not implemented in the current build.",
   },
   {
-    question: "Do I need a credit card to start?",
+    question: "What happens when a job fails?",
     answer:
-      "No. The Starter plan is free forever and includes everything you need to try the platform. Upgrade to Pro whenever you're ready.",
+      "Transient failures remain pending and are reclaimed after the configured queue idle threshold. Jobs that exceed the retry window are marked failed, and permanent failures fail immediately. The status is visible in the dashboard and through the status endpoint.",
+  },
+  {
+    question: "Is there a hosted version?",
+    answer:
+      "No. StreamiX is a public repository that you run yourself. CDN delivery, object storage, autoscaled workers, and live streaming are not part of the current build.",
   },
 ];
 
@@ -46,70 +52,102 @@ export function FaqSection() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <MarketingSection id="faq" className="bg-muted/40">
-      <MarketingSectionHeader
-        badge="FAQ"
-        title="Frequently asked questions"
-        description="Everything you need to know about the platform. Can't find an answer? Reach out and we'll help."
-      />
+    <MarketingSection id="faq" className="border-b border-border/70 bg-muted/20">
+      <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <MarketingSectionHeader
+            align="left"
+            badge="FAQ"
+            title="Questions, answered directly."
+            description="The current build is deliberately small. These answers describe what ships, not what is planned."
+          />
 
-      <div className="mx-auto mt-16 max-w-3xl border-t border-border/70">
-        {faqs.map((faq, index) => {
-          const open = openIndex === index;
+          <div className="mt-9 flex flex-col gap-3 border-t border-border pt-6">
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-2 text-[13px] font-medium text-foreground transition-colors hover:text-primary"
+            >
+              Read the setup guide
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              href="https://github.com/shivamx64/StreamiX/issues"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              <GitBranch className="h-3.5 w-3.5" />
+              Open an issue
+            </Link>
+          </div>
+        </div>
 
-          return (
-            <div key={faq.question} className="border-b border-border/70">
-              <button
-                type="button"
-                id={`faq-button-${index}`}
-                onClick={() => setOpenIndex(open ? null : index)}
-                aria-expanded={open}
-                aria-controls={`faq-panel-${index}`}
-                className="flex w-full items-center justify-between gap-4 py-5 text-left"
-              >
-                <span
-                  className={cn(
-                    "text-base font-medium transition-colors",
-                    open ? "text-primary" : "text-foreground",
-                  )}
+        <div className="border-t border-border">
+          {faqs.map((faq, index) => {
+            const open = openIndex === index;
+
+            return (
+              <div key={faq.question} className="border-b border-border">
+                <button
+                  type="button"
+                  id={`faq-button-${index}`}
+                  onClick={() => setOpenIndex(open ? null : index)}
+                  aria-expanded={open}
+                  aria-controls={`faq-panel-${index}`}
+                  className="group flex w-full items-start gap-4 py-5 text-left md:gap-5 md:py-6"
                 >
-                  {faq.question}
-                </span>
+                  <span className="mt-1 w-5 shrink-0 font-mono text-[9px] tracking-[0.14em] text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
 
-                <motion.span
-                  animate={{ rotate: open ? 45 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="shrink-0"
-                >
-                  <Plus
+                  <span
                     className={cn(
-                      "h-5 w-5",
-                      open ? "text-primary" : "text-muted-foreground",
+                      "flex-1 text-[15px] font-medium tracking-[-0.015em] transition-colors md:text-base",
+                      open
+                        ? "text-foreground"
+                        : "text-foreground group-hover:text-primary",
                     )}
-                  />
-                </motion.span>
-              </button>
-
-              <AnimatePresence initial={false}>
-                {open && (
-                  <motion.div
-                    id={`faq-panel-${index}`}
-                    role="region"
-                    aria-labelledby={`faq-button-${index}`}
-                    initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
-                    <p className="pb-6 pr-10 text-sm leading-7 text-muted-foreground">
-                      {faq.answer}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
+                    {faq.question}
+                  </span>
+
+                  <motion.span
+                    animate={{ rotate: open ? 45 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-0.5 shrink-0"
+                  >
+                    <Plus
+                      className={cn(
+                        "h-4 w-4",
+                        open ? "text-primary" : "text-muted-foreground",
+                      )}
+                    />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div
+                      id={`faq-panel-${index}`}
+                      role="region"
+                      aria-labelledby={`faq-button-${index}`}
+                      initial={
+                        reduceMotion ? false : { height: 0, opacity: 0 }
+                      }
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                    >
+                      <p className="max-w-2xl pb-6 pl-9 pr-8 text-[13px] leading-6 text-muted-foreground md:pl-10 md:text-sm md:leading-7">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </MarketingSection>
   );
