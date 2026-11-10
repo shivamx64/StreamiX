@@ -52,7 +52,7 @@ const stages = [
     title: "Package",
     command: "master.m3u8",
     description:
-      "Write HLS playlists and segments, mark the job ready, and expose playback through authenticated media routes.",
+      "Write HLS playlists and segments, mark the job ready, and expose playback through short-lived signed URLs.",
     state: "playback.ready",
     icon: PackageCheck,
   },

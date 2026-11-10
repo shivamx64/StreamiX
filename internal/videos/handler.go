@@ -198,7 +198,7 @@ func (h *Handler) Thumbnail(ctx *gin.Context) {
 		ctx.Param("id"),
 	)
 
-	h.serveMedia(ctx, media, err)
+	serveMedia(ctx, media, err)
 }
 
 // HLS streams a playlist or segment from a completed video's HLS output.
@@ -217,11 +217,11 @@ func (h *Handler) HLS(ctx *gin.Context) {
 		ctx.Param("path"),
 	)
 
-	h.serveMedia(ctx, media, err)
+	serveMedia(ctx, media, err)
 }
 
 // serveMedia writes an opened media object or maps its error to HTTP.
-func (h *Handler) serveMedia(
+func serveMedia(
 	ctx *gin.Context,
 	media *MediaFile,
 	err error,

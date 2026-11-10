@@ -29,6 +29,15 @@ type VideoStatusResponse struct {
 	Status Status `json:"status"`
 }
 
+// PlaybackSessionResponse contains a short-lived token and the
+// API-relative media paths that use it.
+type PlaybackSessionResponse struct {
+	Token        string    `json:"token"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	HLSURL       string    `json:"hls_url"`
+	ThumbnailURL string    `json:"thumbnail_url"`
+}
+
 // toResponse converts a Video model to its API response representation.
 func toResponse(video *Video) VideoResponse {
 	renditions := video.Renditions

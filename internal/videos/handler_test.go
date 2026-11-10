@@ -14,6 +14,8 @@ import (
 )
 
 type stubService struct {
+	video        *Video
+	getErr       error
 	thumbnail    *MediaFile
 	thumbnailErr error
 
@@ -46,7 +48,7 @@ func (s *stubService) GetByID(
 	userID string,
 	videoID string,
 ) (*Video, error) {
-	return nil, nil
+	return s.video, s.getErr
 }
 
 func (s *stubService) Delete(

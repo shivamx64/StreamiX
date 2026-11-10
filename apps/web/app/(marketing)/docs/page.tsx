@@ -83,8 +83,8 @@ export default function DocumentationPage() {
             <DocsParagraph>
               StreamiX is a distributed video transcoding and streaming
               platform. Upload a video once, and we generate adaptive bitrate
-              HLS renditions and serve them from the edge — no infrastructure
-              to manage. Every request below is made to your{" "}
+              HLS renditions and stream them through short-lived, signed URLs.
+              Every request below is made to your{" "}
               <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
                 NEXT_PUBLIC_API_BASE_URL
               </code>
@@ -112,7 +112,8 @@ export default function DocumentationPage() {
                 Upload a video and poll its status until processing completes.
               </li>
               <li>
-                Play the generated HLS stream from any web or mobile player.
+                Request a signed playback session and load the returned HLS
+                URL in any web or mobile player.
               </li>
             </ol>
 
@@ -238,12 +239,12 @@ export default function DocumentationPage() {
             />
             <DocsCodeBlock
               code={`{
-  "id": "9f1c2f3e-7a6b-4c0d-9e1f-0a1b2c3d4e5f",
-  "name": "movie.mp4",
-  "status": "completed",
-  "renditions": ["480p", "720p", "1080p"],
-  "playlistUrl": "https://stream.streamix.dev/9f1c2f3e-7a6b-4c0d-9e1f-0a1b2c3d4e5f/playlist.m3u8",
-  "createdAt": "2026-08-03T09:15:00Z"
+  "success": true,
+  "message": "video status retrieved successfully",
+  "data": {
+    "id": "9f1c2f3e-7a6b-4c0d-9e1f-0a1b2c3d4e5f",
+    "status": "completed"
+  }
 }`}
               label="json"
             />
@@ -251,29 +252,59 @@ export default function DocumentationPage() {
             {/* Streaming */}
             <DocsHeading id="streaming">Streaming</DocsHeading>
             <DocsParagraph>
-              Once a video is complete, point any HLS-compatible player at its
-              playlist URL. On browsers without native HLS support, use a
-              library such as{" "}
+              Once a video is complete, request a playback session with the
+              access token. The response contains a signed HLS URL and a signed
+              thumbnail URL. Both are relative to the API base URL and work
+              without an{" "}
+              <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">
+                Authorization
+              </code>{" "}
+              header.
+            </DocsParagraph>
+
+            <DocsCodeBlock
+              code={`curl ${baseUrl}/videos/<video_id>/playback \\
+  -H "Authorization: Bearer <access_token>"`}
+            />
+
+            <DocsCodeBlock
+              code={`{
+  "success": true,
+  "message": "playback session created",
+  "data": {
+    "token": "<signed-playback-jwt>",
+    "expires_at": "2026-08-03T10:15:00Z",
+    "hls_url": "/playback/<signed-playback-jwt>/hls/master.m3u8",
+    "thumbnail_url": "/playback/<signed-playback-jwt>/thumbnail"
+  }
+}`}
+              label="json"
+            />
+
+            <DocsParagraph>
+              Pass the HLS URL to any HLS-compatible player. On browsers
+              without native HLS support, use a library such as{" "}
               <code className="rounded-sm border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[0.85em]">hls.js</code>.
             </DocsParagraph>
 
             <DocsCodeBlock
-              code={`<video id="video" controls></video>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-<script>
-  if (Hls.isSupported()) {
-    const video = document.getElementById("video");
-    const hls = new Hls();
-    hls.loadSource("https://stream.streamix.dev/<video_id>/playlist.m3u8");
-    hls.attachMedia(video);
-  }
-</script>`}
-              label="html"
+              code={`const playback = await fetch(
+  \`${baseUrl}/videos/\${videoId}/playback\`,
+  { headers: { Authorization: \`Bearer \${accessToken}\` } },
+).then((response) => response.json());
+
+const hls = new Hls();
+hls.loadSource(\`${baseUrl}\${playback.data.hls_url}\`);
+hls.attachMedia(videoElement);`}
+              label="javascript"
             />
 
             <DocsCallout>
-              Playback URLs are edge-cached and adaptive — bandwidth shifts
-              to lower or higher renditions automatically during playback.
+              Playback tokens are scoped to one video and expire after one hour
+              by default. The token stays in the URL path, so variant playlists
+              and segments remain signed without query-string rewriting. An
+              expired or invalid link returns 401 — request a new session to
+              recover.
             </DocsCallout>
 
             {/* Errors */}

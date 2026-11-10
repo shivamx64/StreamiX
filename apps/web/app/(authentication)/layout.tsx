@@ -13,15 +13,15 @@ export default function ProtectedLayout({
   children,
 }: ProtectedLayoutProps) {
   const router = useRouter();
-  const { tokens } = useAuthenticationContext();
+  const { tokens, isReady } = useAuthenticationContext();
 
   useEffect(() => {
-    if (!tokens) {
+    if (isReady && !tokens) {
       router.replace("/login");
     }
-  }, [tokens, router]);
+  }, [isReady, tokens, router]);
 
-  if (!tokens) {
+  if (!isReady || !tokens) {
     return null;
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 
 import { authenticationService } from "@/services/authentication-service";
 import type {
@@ -25,6 +25,18 @@ function readStoredTokens(): TokenState {
   }
 }
 
+function subscribeToHydration(): () => void {
+  return () => undefined;
+}
+
+function useIsHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  );
+}
+
 function readApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const payload = error.response?.data as
@@ -39,6 +51,7 @@ function readApiErrorMessage(error: unknown): string {
 
 export function useAuthentication() {
   const [tokens, setTokens] = useState<TokenState>(readStoredTokens);
+  const isReady = useIsHydrated();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -111,6 +124,7 @@ export function useAuthentication() {
 
   return {
     tokens,
+    isReady,
     isSubmitting,
     error,
     login,

@@ -41,3 +41,10 @@ export type VideoUploadResponse = {
   id: string;
   status: VideoStatus;
 };
+
+export type VideoPlaybackSession = {
+  token: string;
+  expires_at: string;
+  hls_url: string;
+  thumbnail_url: string;
+};

@@ -14,7 +14,7 @@ import { WorkflowSection } from "@/components/landing-page/workflow/workflow-sec
 export const metadata: Metadata = {
   title: "Video processing, built as a pipeline",
   description:
-    "Upload source files, run FFmpeg jobs over Redis Streams, and deliver adaptive HLS with authenticated playback.",
+    "Upload source files, run FFmpeg jobs over Redis Streams, and deliver adaptive HLS through signed playback URLs.",
 };
 
 export default function LandingPage() {

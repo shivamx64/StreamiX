@@ -25,7 +25,7 @@ const concerns = [
     number: "03",
     title: "Play back with control",
     description:
-      "Adaptive HLS is served through authenticated media routes. The dashboard player respects session state and lets you select available renditions during playback.",
+      "Adaptive HLS is served through short-lived, video-scoped signed URLs. The dashboard player renews an expired playback session and resumes from the current position.",
     icon: Timer,
     detail: "transcoded → ready",
   },

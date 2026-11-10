@@ -19,10 +19,7 @@ export const apiEndpoints = {
 		status: (id: string) =>
 			`/videos/${id}/status`,
 
-		thumbnail: (id: string) =>
-			`/videos/${id}/thumbnail`,
-
-		hls: (id: string) =>
-			`/videos/${id}/hls/master.m3u8`,
+		playback: (id: string) =>
+			`/videos/${id}/playback`,
 	},
 }

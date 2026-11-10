@@ -75,7 +75,7 @@ export function HeroSection() {
 
           <MarketingSectionDescription className="mt-6 max-w-2xl">
             Upload a source file, queue an FFmpeg job over Redis Streams, and
-            deliver adaptive HLS with authenticated playback.
+            deliver adaptive HLS through signed playback URLs.
           </MarketingSectionDescription>
 
           <div className="mt-8 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">

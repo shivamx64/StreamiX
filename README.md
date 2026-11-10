@@ -27,12 +27,16 @@ StreamiX follows an asynchronous event-driven architecture where the API coordin
 
 **Transcoding pipeline**
 - Job queue backed by Redis Streams with consumer groups
-- At-least-once delivery: failed jobs stay pending and are reclaimed by workers for retry (`XAUTOCLAIM`), with dead-lettering after the retry window
+- At-least-once delivery: failed jobs stay pending and are reclaimed by workers for retry (`XAUTOCLAIM`) inside a bounded window, then land in a terminal failure state
 - FFprobe metadata extraction (duration, resolution)
 - HLS transcoding into multiple renditions (1080p/720p/480p, falling back to 240p for low-resolution sources)
 - Master playlist generation with proper bandwidth metadata
 - Thumbnail extraction
 - Outputs written to storage alongside the source object
+
+**Playback**
+- Short-lived, video-scoped signed playback URLs for native HLS players and plain media requests
+- Playback tokens authorize HLS playlists, segments, and thumbnails without per-request Authorization headers
 
 **Processing lifecycle**
 - Videos transition through `uploaded → queued → processing → completed | failed`
@@ -48,15 +52,13 @@ StreamiX follows an asynchronous event-driven architecture where the API coordin
 - Structured logging (`log/slog`), request IDs, recovery middleware, CORS
 - Standard response envelopes for success and error payloads
 - Unit tests for storage, video service, queue, and transcoder packages
+- Docker Compose development stack for PostgreSQL, Redis, API, worker, and web
 
 ### Not yet implemented
 
 The following are tracked in the roadmap and intentionally absent from this version:
 
-- An endpoint to serve the generated HLS output (playback in the dashboard)
-- Refresh token rotation (`/auth/refresh` is referenced by the web client but not implemented server-side)
 - Object storage drivers beyond the local filesystem (S3-compatible)
-- Containerization and deployment tooling
 
 ## Architecture
 
@@ -87,7 +89,7 @@ A Next.js App Router application with three route groups:
 - `(auth)` — login and signup
 - `(authentication)/(dashboard)` — the protected dashboard: overview, upload, video library, and video detail pages
 
-Server state is managed with TanStack Query; authentication state lives in a React context backed by localStorage and an axios request interceptor that attaches the Bearer token. Forms use react-hook-form with zod validation, uploads use react-dropzone, and video status is polled every five seconds. Completed videos play through an hls.js player that attaches the current Bearer token to HLS manifest and segment requests, while thumbnails are fetched as authenticated blobs.
+Server state is managed with TanStack Query; authentication state lives in a React context backed by localStorage and an axios request interceptor that attaches the Bearer token. Forms use react-hook-form with zod validation, uploads use react-dropzone, and video status is polled every five seconds. Completed videos request a short-lived playback session and use the returned signed HLS URL with hls.js; the token in the URL path also authorizes variant playlists, segments, and the poster without attaching an Authorization header.
 
 ### Backend
 
@@ -96,6 +98,8 @@ The API is a layered Gin application. `bootstrap` wires configuration, database,
 ### Authentication
 
 Registration hashes passwords with bcrypt and stores the hash. Login verifies the password and issues two signed JWTs: a short-lived access token (15 minutes by default) carried as `Authorization: Bearer <token>`, and a longer-lived refresh token. The `Auth` middleware validates the access token and injects the user ID into the request context; every video route derives the acting user from the token, never from the request body.
+
+Signed playback tokens are separate HS256 JWTs with `type=playback`, a user ID, and a video ID. They expire after `PLAYBACK_TOKEN_TTL` (one hour by default), cannot authenticate API routes, and are only accepted by the public playback routes.
 
 ### Storage
 
@@ -197,6 +201,38 @@ Key packages are deliberately scoped: `internal/queue` knows nothing about video
 
 ## Local Development
 
+### Docker Compose
+
+The fastest way to run the full stack is Docker Compose. It starts PostgreSQL, Redis, the API, the transcoding worker with FFmpeg, and the production Next.js build:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:3000`; the API is available at `http://localhost:8080`. PostgreSQL and Redis stay on the internal Compose network and are not published to the host.
+
+If port `3000` or `8080` is already in use, override the published ports:
+
+```bash
+WEB_PORT=3001 API_PORT=8081 docker compose up --build
+```
+
+The web image is built with the API URL baked in, and the API CORS origin follows `WEB_PORT`, so use `--build` whenever either port changes. `PUBLIC_HOST` can be set when the stack is accessed through a hostname other than `localhost`. On memory-constrained Docker hosts, add `--parallel 1` to limit concurrent image builds.
+
+The compose stack reads `JWT_SECRET`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME` from the shell or the root `.env` file. Development defaults are provided for all four; change `JWT_SECRET` before exposing the stack beyond your machine. `PLAYBACK_TOKEN_TTL` defaults to `1h`.
+
+Useful commands:
+
+```bash
+docker compose logs -f api worker    # follow backend logs
+docker compose exec postgres psql -U streamix -d streamix
+docker compose exec redis redis-cli
+docker compose down                  # stop the stack
+docker compose down -v               # stop and delete database, Redis, and storage volumes
+```
+
+If you use Docker Compose, you can skip the manual setup below.
+
 ### Prerequisites
 
 - Go 1.25+
@@ -290,6 +326,7 @@ Transcoder tests generate real media with FFmpeg and are skipped when the binari
 | `APP_VERSION` | no | `dev` | Version reported by the health endpoint |
 | `HTTP_HOST` | no | `0.0.0.0` | API bind address |
 | `HTTP_PORT` | no | `8080` | API bind port |
+| `CORS_ALLOWED_ORIGINS` | no | `http://localhost:3000` | Comma-separated browser origins allowed to call the API |
 | `DB_HOST` | yes | — | PostgreSQL host |
 | `DB_PORT` | yes | — | PostgreSQL port |
 | `DB_USER` | yes | — | PostgreSQL user |
@@ -299,6 +336,7 @@ Transcoder tests generate real media with FFmpeg and are skipped when the binari
 | `JWT_SECRET` | yes | — | Secret used to sign and verify JWTs |
 | `JWT_ACCESS_TOKEN_TTL` | no | `15m` | Access token lifetime (Go duration) |
 | `JWT_REFRESH_TOKEN_TTL` | no | `168h` | Refresh token lifetime (Go duration) |
+| `PLAYBACK_TOKEN_TTL` | no | `1h` | Signed playback URL lifetime (Go duration) |
 | `STORAGE_DRIVER` | no | `local` | Storage backend (only `local` is implemented) |
 | `LOCAL_STORAGE_ROOT` | no | `storage` | Root directory for local storage |
 | `QUEUE_DRIVER` | no | `redis` | Job queue backend (only `redis` is implemented) |
@@ -467,13 +505,42 @@ Responds `200` with the processing status, intended for polling:
 
 Possible statuses: `uploaded`, `queued`, `processing`, `completed`, `failed`.
 
-#### Get thumbnail
+#### Create playback session
+
+`GET /api/v1/videos/:id/playback` — authenticated, owner only.
+
+Issues a short-lived, video-scoped token for playback. Both URLs are relative to the API base URL and need no `Authorization` header:
+
+```json
+{
+  "success": true,
+  "message": "playback session created",
+  "data": {
+    "token": "<signed-playback-jwt>",
+    "expires_at": "2026-08-03T10:15:00Z",
+    "hls_url": "/playback/<signed-playback-jwt>/hls/master.m3u8",
+    "thumbnail_url": "/playback/<signed-playback-jwt>/thumbnail"
+  }
+}
+```
+
+Responds `409` when the video has not completed processing. Tokens expire after `PLAYBACK_TOKEN_TTL` (one hour by default).
+
+#### Stream signed playback
+
+`GET /api/v1/playback/:token/hls/*path` — no Authorization header required.
+
+`GET /api/v1/playback/:token/thumbnail` — no Authorization header required.
+
+The token must be a valid, unexpired playback token. Because the token is in the URL path, relative HLS playlist entries inherit it automatically for variant playlists and segments. Invalid or expired tokens return `401`.
+
+#### Get thumbnail with bearer auth
 
 `GET /api/v1/videos/:id/thumbnail` — authenticated, owner only.
 
 Streams the generated JPEG poster for a completed video. Responds `404` until processing has completed.
 
-#### Stream HLS
+#### Stream HLS with bearer auth
 
 `GET /api/v1/videos/:id/hls/*path` — authenticated, owner only.
 
@@ -502,7 +569,7 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 
 **Infrastructure as seams.** Storage, queue, and transcoding are all behind interfaces with real, runnable local implementations. Adding an S3 driver or swapping Redis for another broker should never touch business logic.
 
-**Failures are explicit.** Uploads roll back orphaned objects, jobs that fail transiently are retried by the queue, and permanent failures dead-letter to a `failed` status instead of looping forever. Error responses are a single standard envelope so clients and the frontend handle errors uniformly.
+**Failures are explicit.** Uploads roll back orphaned objects, jobs that fail transiently are retried inside a bounded window, and permanent failures land in a `failed` terminal state instead of looping forever. Error responses are a single standard envelope so clients and the frontend handle errors uniformly.
 
 **Conventions.**
 - Go code is formatted with `gofmt` and vetted with `go vet`; every new feature ships with tests (`go test ./...`)
@@ -515,12 +582,10 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 
 The following milestones follow naturally from the current implementation:
 
-1. **Signed playback URLs** — short-lived, video-scoped tokens so native HLS players and plain media URLs can load protected output without per-request Authorization headers.
-2. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
-3. **Containerized development** — Docker Compose for PostgreSQL, Redis, API, worker, and web, with the FFmpeg binaries baked into the worker image.
-4. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
-5. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
-6. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
+1. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
+2. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
+3. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
+4. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
 
 ## Contributing
 

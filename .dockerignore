@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.env.*
+node_modules
+apps/web
+public
+storage
+dump.rdb
+*.log
+coverage
+README.md
+compose.yaml
+compose.yml
+docker-compose.yaml
+docker-compose.yml
+docker/web.Dockerfile

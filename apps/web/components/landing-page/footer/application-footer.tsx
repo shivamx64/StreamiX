@@ -55,7 +55,7 @@ export function ApplicationFooter() {
 
             <p className="mt-5 max-w-xs text-sm leading-6 text-stone-400">
               A self-hosted pipeline for uploads, FFmpeg transcoding, adaptive
-              HLS, and authenticated playback.
+              HLS, and signed playback URLs.
             </p>
 
             <Link

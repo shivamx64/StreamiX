@@ -26,9 +26,9 @@ const faqs = [
       "A master HLS playlist with 1080p, 720p, and 480p variants when the source supports them, plus a 240p fallback for low-resolution sources. It also generates a JPEG thumbnail from the video.",
   },
   {
-    question: "How does authenticated playback work?",
+    question: "How does playback access work?",
     answer:
-      "HLS playlists and segments are streamed by the API through per-user routes. The route resolves the video against the authenticated session before reading media from storage. The dashboard player uses hls.js and attaches the bearer token to manifest and segment requests.",
+      "The owner requests a short-lived playback session, which returns a video-scoped signed HLS URL. The API validates that token on every playlist, segment, and thumbnail request, so native players and plain media URLs work without an Authorization header. Expired sessions can be renewed by the dashboard.",
   },
   {
     question: "Where is media stored?",

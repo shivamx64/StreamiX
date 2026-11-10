@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 
 import { ThemeToggle } from "@/components/shared-ui/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { useAuthenticationContext } from "@/providers/authentication-provider";
 
 import { navigationItems } from "./navigation-links";
 import { NavigationLogo } from "./navigation-logo";
@@ -18,7 +19,9 @@ const focusableSelector =
 const emptySubscribe = () => () => {};
 
 export function MobileNavigationSheet() {
+  const { tokens, isReady } = useAuthenticationContext();
   const [open, setOpen] = useState(false);
+  const isAuthenticated = isReady && Boolean(tokens);
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -154,16 +157,39 @@ export function MobileNavigationSheet() {
 
                   <div className="mt-auto border-t border-border pt-6">
                     <div className="flex flex-col gap-3">
-                      <Button asChild variant="outline" className="w-full">
-                        <Link href="/login" onClick={() => setOpen(false)}>
-                          Log in
-                        </Link>
-                      </Button>
-                      <Button asChild className="w-full">
-                        <Link href="/signup" onClick={() => setOpen(false)}>
-                          Get started
-                        </Link>
-                      </Button>
+                      {isAuthenticated ? (
+                        <Button asChild className="w-full">
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setOpen(false)}
+                          >
+                            Dashboard
+                          </Link>
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="w-full"
+                          >
+                            <Link
+                              href="/login"
+                              onClick={() => setOpen(false)}
+                            >
+                              Log in
+                            </Link>
+                          </Button>
+                          <Button asChild className="w-full">
+                            <Link
+                              href="/signup"
+                              onClick={() => setOpen(false)}
+                            >
+                              Get started
+                            </Link>
+                          </Button>
+                        </>
+                      )}
                     </div>
 
                     <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

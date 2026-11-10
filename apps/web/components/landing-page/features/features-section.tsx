@@ -128,14 +128,14 @@ export function FeaturesSection() {
             Media belongs to its owner.
           </h3>
           <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-            Thumbnail and HLS routes resolve the video against the
-            authenticated user before streaming a byte from disk.
+            Playback sessions are scoped to one video and every playlist,
+            segment, and thumbnail request is validated before a byte is read.
           </p>
 
           <div className="mt-6 flex items-center gap-2 rounded-md border border-border bg-muted/20 px-3 py-2">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
             <code className="truncate font-mono text-[8px] text-muted-foreground">
-              GET /videos/:id/hls/master.m3u8
+              GET /playback/:token/hls/*path
             </code>
           </div>
         </StaggerItem>
@@ -183,7 +183,7 @@ export function FeaturesSection() {
           </h3>
           <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
             The worker captures a poster frame alongside HLS output, served
-            through the same authenticated media path.
+            through the same short-lived signed playback session.
           </p>
 
           <div className="relative mt-6 aspect-[16/7] overflow-hidden rounded-md border border-border bg-[#171512]">

@@ -8,11 +8,13 @@ import (
 )
 
 // CORS configures Cross-Origin Resource Sharing.
-func CORS() gin.HandlerFunc {
+func CORS(allowedOrigins []string) gin.HandlerFunc {
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"http://localhost:3000"}
+	}
+
 	return cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:3000",
-		},
+		AllowOrigins: allowedOrigins,
 
 		AllowMethods: []string{
 			"GET",

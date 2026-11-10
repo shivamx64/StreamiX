@@ -85,16 +85,16 @@ const flow = [
   {
     number: "05",
     title: "Deliver",
-    notes: "ownership checked before streaming",
+    notes: "token scoped to one video",
     nodes: [
       {
         name: "Media routes",
-        detail: "HLS + JPEG",
+        detail: "signed HLS + JPEG",
         icon: ShieldCheck,
       },
       {
         name: "hls.js",
-        detail: "authenticated playback",
+        detail: "signed playback",
         icon: Play,
       },
     ],
@@ -120,7 +120,7 @@ const constraints = [
   {
     title: "Ownership at the route",
     description:
-      "Every media request resolves the video against the authenticated user before a file is opened.",
+      "Every signed media request validates a video-scoped token and resolves the owner before a file is opened.",
   },
 ];
 

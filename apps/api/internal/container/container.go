@@ -17,10 +17,11 @@ type Container struct {
 	Logger *slog.Logger
 	DB     *gorm.DB
 
-	TokenManager *auth.TokenManager
-	Storage storage.Storage
-	UserHandler *users.Handler
-	VideoHandler *videos.Handler
+	TokenManager    *auth.TokenManager
+	Storage         storage.Storage
+	UserHandler     *users.Handler
+	VideoHandler    *videos.Handler
+	PlaybackHandler *videos.PlaybackHandler
 }
 
 func New(
@@ -57,6 +58,11 @@ func New(
 		videoService,
 	)
 
+	playbackHandler := videos.NewPlaybackHandler(
+		videoService,
+		tokenManager,
+	)
+
 	return &Container{
 		Config: cfg,
 		Logger: logger,
@@ -67,6 +73,7 @@ func New(
 
 		UserHandler: userHandler,
 
-		VideoHandler: videoHandler,
+		VideoHandler:    videoHandler,
+		PlaybackHandler: playbackHandler,
 	}
 }

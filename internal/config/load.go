@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -73,6 +74,16 @@ func Load() (*Config, error) {
 		)
 	}
 
+	playbackTokenTTL, err := time.ParseDuration(
+		getEnv("PLAYBACK_TOKEN_TTL", "1h"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"configuration error: PLAYBACK_TOKEN_TTL must be a valid duration: %w",
+			err,
+		)
+	}
+
 	redisDB, err := getEnvAsInt("REDIS_DB", 0)
 	if err != nil {
 		return nil, err
@@ -95,8 +106,9 @@ func Load() (*Config, error) {
 			Version:     getEnv("APP_VERSION", "dev"),
 		},
 		HTTP: HTTPConfig{
-			Host: getEnv("HTTP_HOST", "0.0.0.0"),
-			Port: httpPort,
+			Host:               getEnv("HTTP_HOST", "0.0.0.0"),
+			Port:               httpPort,
+			CORSAllowedOrigins: splitList(getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")),
 		},
 		Database: DatabaseConfig{
 			Host:     dbHost,
@@ -107,9 +119,10 @@ func Load() (*Config, error) {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Auth: AuthConfig{
-			JWTSecret:       jwtSecret,
-			AccessTokenTTL:  accessTokenTTL,
-			RefreshTokenTTL: refreshTokenTTL,
+			JWTSecret:        jwtSecret,
+			AccessTokenTTL:   accessTokenTTL,
+			RefreshTokenTTL:  refreshTokenTTL,
+			PlaybackTokenTTL: playbackTokenTTL,
 		},
 		Storage: StorageConfig{
 			Driver:    getEnv("STORAGE_DRIVER", "local"),
@@ -139,6 +152,22 @@ func getEnv(key, defaultValue string) string {
 	}
 
 	return value
+}
+
+// splitList parses a comma-separated environment value, trimming
+// whitespace and dropping empty entries.
+func splitList(value string) []string {
+	parts := strings.Split(value, ",")
+	values := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			values = append(values, part)
+		}
+	}
+
+	return values
 }
 
 // requireEnv returns the value of a required environment variable.

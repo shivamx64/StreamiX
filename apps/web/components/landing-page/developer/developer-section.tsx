@@ -18,9 +18,9 @@ const developerNotes = [
     icon: Braces,
   },
   {
-    title: "Session-aware media",
+    title: "Scoped playback links",
     description:
-      "Request HLS and thumbnails with the same bearer session used by the dashboard. Media routes enforce video ownership.",
+      "Issue a short-lived playback session, then hand the returned HLS URL to hls.js, Safari, or a native player. Media requests need no bearer header.",
     icon: KeyRound,
   },
   {
@@ -167,7 +167,7 @@ export function DeveloperSection() {
               <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[8px] uppercase tracking-[0.1em] text-stone-500">
                 <span className="text-stone-300">POST /videos</span>
                 <span>GET /videos/:id/status</span>
-                <span>GET /videos/:id/hls/*path</span>
+                <span>GET /videos/:id/playback</span>
               </div>
               <span className="font-mono text-[8px] uppercase tracking-[0.1em] text-emerald-400">
                 Ready

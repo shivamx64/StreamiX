@@ -11,37 +11,40 @@ import (
 
 // Claims represents the JWT claims used by StreamiX.
 type Claims struct {
-	UserID string `json:"user_id"`
-	Type   string `json:"type"`
+	UserID  string `json:"user_id"`
+	VideoID string `json:"video_id,omitempty"`
+	Type    string `json:"type"`
 
 	jwt.RegisteredClaims
 }
 
 // TokenManager is responsible for generating and validating JWTs.
 type TokenManager struct {
-	secret          []byte
-	accessTokenTTL  time.Duration
-	refreshTokenTTL time.Duration
+	secret           []byte
+	accessTokenTTL   time.Duration
+	refreshTokenTTL  time.Duration
+	playbackTokenTTL time.Duration
 }
 
 // NewTokenManager creates a new JWT token manager.
 func NewTokenManager(cfg config.AuthConfig) *TokenManager {
 	return &TokenManager{
-		secret:          []byte(cfg.JWTSecret),
-		accessTokenTTL:  cfg.AccessTokenTTL,
-		refreshTokenTTL: cfg.RefreshTokenTTL,
+		secret:           []byte(cfg.JWTSecret),
+		accessTokenTTL:   cfg.AccessTokenTTL,
+		refreshTokenTTL:  cfg.RefreshTokenTTL,
+		playbackTokenTTL: cfg.PlaybackTokenTTL,
 	}
 }
 
 // GenerateAccessToken creates a signed access token.
 func (m *TokenManager) GenerateAccessToken(userID string) (string, error) {
-	token, _, err := m.generateToken(userID, m.accessTokenTTL, "access")
+	token, _, err := m.generateToken(userID, "", "access", m.accessTokenTTL)
 	return token, err
 }
 
 // GenerateRefreshToken creates a signed refresh token.
 func (m *TokenManager) GenerateRefreshToken(userID string) (string, error) {
-	token, _, err := m.generateToken(userID, m.refreshTokenTTL, "refresh")
+	token, _, err := m.generateToken(userID, "", "refresh", m.refreshTokenTTL)
 	return token, err
 }
 
@@ -51,7 +54,36 @@ func (m *TokenManager) GenerateRefreshToken(userID string) (string, error) {
 func (m *TokenManager) GenerateRefreshTokenWithID(
 	userID string,
 ) (string, string, error) {
-	return m.generateToken(userID, m.refreshTokenTTL, "refresh")
+	token, claims, err := m.generateToken(
+		userID,
+		"",
+		"refresh",
+		m.refreshTokenTTL,
+	)
+	if err != nil {
+		return "", "", err
+	}
+
+	return token, claims.ID, nil
+}
+
+// GeneratePlaybackToken creates a short-lived, video-scoped token for
+// media requests that cannot attach an Authorization header.
+func (m *TokenManager) GeneratePlaybackToken(
+	userID string,
+	videoID string,
+) (string, time.Time, error) {
+	token, claims, err := m.generateToken(
+		userID,
+		videoID,
+		"playback",
+		m.playbackTokenTTL,
+	)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return token, claims.ExpiresAt.Time, nil
 }
 
 // RefreshTokenTTL returns the refresh token lifetime.
@@ -70,7 +102,7 @@ func (m *TokenManager) RefreshTokenExpiresIn() int64 {
 }
 
 // validateToken parses a JWT and checks that it is valid and of the
-// expected type ("access" or "refresh").
+// expected type ("access", "refresh", or "playback").
 func (m *TokenManager) validateToken(
 	tokenString string,
 	wantType string,
@@ -99,8 +131,8 @@ func (m *TokenManager) validateToken(
 		return nil, ErrInvalidToken
 	}
 
-	// A refresh token must never be accepted as an access token and
-	// vice versa.
+	// A token issued for one purpose must never be accepted for another
+	// (for example, a playback URL must not authenticate API requests).
 	if claims.Type != wantType {
 		return nil, ErrInvalidToken
 	}
@@ -122,18 +154,37 @@ func (m *TokenManager) ValidateRefreshToken(
 	return m.validateToken(tokenString, "refresh")
 }
 
+// ValidatePlaybackToken validates a signed playback URL token and
+// returns its claims.
+func (m *TokenManager) ValidatePlaybackToken(
+	tokenString string,
+) (*Claims, error) {
+	claims, err := m.validateToken(tokenString, "playback")
+	if err != nil {
+		return nil, err
+	}
+
+	if claims.VideoID == "" {
+		return nil, ErrInvalidToken
+	}
+
+	return claims, nil
+}
+
 // generateToken creates and signs a JWT and returns the token string
-// alongside its unique ID (jti).
+// alongside its claims.
 func (m *TokenManager) generateToken(
 	userID string,
-	ttl time.Duration,
+	videoID string,
 	tokenType string,
-) (string, string, error) {
+	ttl time.Duration,
+) (string, *Claims, error) {
 
 	now := time.Now()
 	claims := Claims{
-		UserID: userID,
-		Type:   tokenType,
+		UserID:  userID,
+		VideoID: videoID,
+		Type:    tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   userID,
 			ID:        uuid.New().String(),
@@ -143,12 +194,12 @@ func (m *TokenManager) generateToken(
 	}
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		claims,
+		&claims,
 	)
 	signed, err := token.SignedString(m.secret)
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
 
-	return signed, claims.ID, nil
+	return signed, &claims, nil
 }

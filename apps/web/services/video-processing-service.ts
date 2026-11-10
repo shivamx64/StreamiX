@@ -1,7 +1,11 @@
 import { apiEndpoints } from "@/constants/api-endpoints";
 import { apiClient } from "@/lib/api-client";
 import type { ApiEnvelope } from "@/types/api-contracts";
-import type { Video, VideoStatusResponse } from "@/types/video-types";
+import type {
+  Video,
+  VideoPlaybackSession,
+  VideoStatusResponse,
+} from "@/types/video-types";
 
 export const videoProcessingService = {
   async list(): Promise<Video[]> {
@@ -40,13 +44,21 @@ export const videoProcessingService = {
     return data.data;
   },
 
-  async thumbnail(id: string): Promise<Blob> {
-    const { data } = await apiClient.get<Blob>(
-      apiEndpoints.videos.thumbnail(id),
-      { responseType: "blob" },
+  async playback(id: string): Promise<VideoPlaybackSession> {
+    const { data } = await apiClient.get<ApiEnvelope<VideoPlaybackSession>>(
+      apiEndpoints.videos.playback(id),
     );
 
-    return data;
+    if (
+      !data?.data?.token ||
+      !data.data.expires_at ||
+      !data.data.hls_url ||
+      !data.data.thumbnail_url
+    ) {
+      throw new Error("Invalid playback session response");
+    }
+
+    return data.data;
   },
 
   async remove(id: string): Promise<void> {

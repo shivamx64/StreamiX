@@ -41,6 +41,10 @@ type HTTPConfig struct {
 
 	// Port is the HTTP server port.
 	Port int
+
+	// CORSAllowedOrigins lists the browser origins permitted to call
+	// the API.
+	CORSAllowedOrigins []string
 }
 
 // Address returns the HTTP server address in host:port format.
@@ -76,6 +80,9 @@ type AuthConfig struct {
 
 	// RefreshTokenTTL defines the lifetime of refresh tokens.
 	RefreshTokenTTL time.Duration
+
+	// PlaybackTokenTTL defines the lifetime of signed playback URLs.
+	PlaybackTokenTTL time.Duration
 }
 
 // StorageConfig contains object storage configuration.

@@ -23,7 +23,7 @@ func Register(router *gin.Engine, c *container.Container) {
 		middleware.RequestID(),
 		middleware.Recovery(c.Logger),
 		middleware.Logger(c.Logger),
-		middleware.CORS(),
+		middleware.CORS(c.Config.HTTP.CORSAllowedOrigins),
 	)
 
 	// Health check endpoint.
@@ -114,8 +114,29 @@ func Register(router *gin.Engine, c *container.Container) {
 		c.VideoHandler.HLS,
 	)
 
+	videos.GET(
+		"/:id/playback",
+		c.PlaybackHandler.Session,
+	)
+
 	videos.DELETE(
 		"/:id",
 		c.VideoHandler.Delete,
 	)
+
+	// Signed playback routes. The token in the path authorizes the
+	// request, allowing native HLS players and plain media URLs to
+	// stream without an Authorization header.
+	playback := api.Group("/playback")
+	{
+		playback.GET(
+			"/:token/hls/*path",
+			c.PlaybackHandler.HLS,
+		)
+
+		playback.GET(
+			"/:token/thumbnail",
+			c.PlaybackHandler.Thumbnail,
+		)
+	}
 }
