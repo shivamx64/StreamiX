@@ -37,9 +37,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	storageBackend := storage.NewLocalStorage(
-		cfg.Storage.LocalRoot,
+	storageBackend, err := storage.New(
+		context.Background(),
+		storage.Config{
+			Driver:    cfg.Storage.Driver,
+			LocalRoot: cfg.Storage.LocalRoot,
+			S3: storage.S3Options{
+				Endpoint:        cfg.Storage.S3.Endpoint,
+				Region:          cfg.Storage.S3.Region,
+				Bucket:          cfg.Storage.S3.Bucket,
+				AccessKeyID:     cfg.Storage.S3.AccessKeyID,
+				SecretAccessKey: cfg.Storage.S3.SecretAccessKey,
+				UseSSL:          cfg.Storage.S3.UseSSL,
+				ForcePathStyle:  cfg.Storage.S3.ForcePathStyle,
+			},
+		},
 	)
+	if err != nil {
+		log.Fatalf("initialize storage: %v", err)
+	}
 
 	tx, err := transcoder.New("", "")
 	if err != nil {

@@ -99,6 +99,16 @@ func Load() (*Config, error) {
 		)
 	}
 
+	s3UseSSL, err := getEnvAsBool("S3_USE_SSL", true)
+	if err != nil {
+		return nil, err
+	}
+
+	s3ForcePathStyle, err := getEnvAsBool("S3_FORCE_PATH_STYLE", false)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
 		App: AppConfig{
 			Name:        getEnv("APP_NAME", "streamix-api"),
@@ -127,6 +137,15 @@ func Load() (*Config, error) {
 		Storage: StorageConfig{
 			Driver:    getEnv("STORAGE_DRIVER", "local"),
 			LocalRoot: getEnv("LOCAL_STORAGE_ROOT", "storage"),
+			S3: S3Config{
+				Endpoint:        getEnv("S3_ENDPOINT", ""),
+				Region:          getEnv("S3_REGION", "us-east-1"),
+				Bucket:          getEnv("S3_BUCKET", ""),
+				AccessKeyID:     getEnv("S3_ACCESS_KEY_ID", ""),
+				SecretAccessKey: getEnv("S3_SECRET_ACCESS_KEY", ""),
+				UseSSL:          s3UseSSL,
+				ForcePathStyle:  s3ForcePathStyle,
+			},
 		},
 		Queue: QueueConfig{
 			Driver:        getEnv("QUEUE_DRIVER", "redis"),
@@ -193,6 +212,23 @@ func getEnvAsInt(key string, defaultValue int) (int, error) {
 	parsed, err := strconv.Atoi(value)
 	if err != nil {
 		return 0, fmt.Errorf("configuration error: %s must be a valid integer", key)
+	}
+
+	return parsed, nil
+}
+
+// getEnvAsBool returns a boolean environment variable.
+// If it is not set, the provided default value is returned.
+func getEnvAsBool(key string, defaultValue bool) (bool, error) {
+	value := os.Getenv(key)
+
+	if value == "" {
+		return defaultValue, nil
+	}
+
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return false, fmt.Errorf("configuration error: %s must be a valid boolean", key)
 	}
 
 	return parsed, nil

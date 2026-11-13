@@ -6,7 +6,7 @@ The project is a learning-oriented implementation of the systems that power mode
 
 ## High Level Architecture
 
-StreamiX follows an asynchronous event-driven architecture where the API coordinates uploads, Redis queues transcoding jobs, Go workers process videos with FFmpeg, and Amazon S3 stores both raw uploads and HLS artifacts.
+StreamiX follows an asynchronous event-driven architecture where the API coordinates uploads, Redis queues transcoding jobs, Go workers process videos with FFmpeg, and object storage holds both raw uploads and HLS artifacts. The local filesystem is the default; S3-compatible buckets are supported as an alternative.
 
 ![StreamiX High Level Architecture](./public/streamix-architecture.png)
 
@@ -22,7 +22,7 @@ StreamiX follows an asynchronous event-driven architecture where the API coordin
 
 **Video upload**
 - Multipart uploads up to 2 GB (MP4, WebM, MOV)
-- Direct-to-storage uploads through a pluggable `Storage` interface
+- Direct-to-storage uploads through a pluggable `Storage` interface with local filesystem and S3-compatible drivers
 - Immediate database record creation with rollback of orphaned objects on failure
 
 **Transcoding pipeline**
@@ -58,7 +58,9 @@ StreamiX follows an asynchronous event-driven architecture where the API coordin
 
 The following are tracked in the roadmap and intentionally absent from this version:
 
-- Object storage drivers beyond the local filesystem (S3-compatible)
+- Realtime status updates (the dashboard currently polls every 5 seconds)
+- Kubernetes manifests and CI/CD deployment automation
+- Request, worker, and queue observability metrics
 
 ## Architecture
 
@@ -86,8 +88,8 @@ API Service (Go/Gin)
 A Next.js App Router application with three route groups:
 
 - `(marketing)` — the public landing page and docs page
-- `(auth)` — login and signup
-- `(authentication)/(dashboard)` — the protected dashboard: overview, upload, video library, and video detail pages
+- `(auth)` — guest-only login and signup; authenticated users are redirected to the dashboard
+- `(authentication)/(dashboard)` — the protected dashboard: overview, upload, video library, and video detail pages. Unauthenticated users are sent to `/login?next=...` and returned to their original page after signing in.
 
 Server state is managed with TanStack Query; authentication state lives in a React context backed by localStorage and an axios request interceptor that attaches the Bearer token. Forms use react-hook-form with zod validation, uploads use react-dropzone, and video status is polled every five seconds. Completed videos request a short-lived playback session and use the returned signed HLS URL with hls.js; the token in the URL path also authorizes variant playlists, segments, and the poster without attaching an Authorization header.
 
@@ -103,7 +105,7 @@ Signed playback tokens are separate HS256 JWTs with `type=playback`, a user ID, 
 
 ### Storage
 
-The `internal/storage` package defines a minimal interface (`Save`, `Open`, `Delete`) and ships a local-filesystem implementation. Object keys are namespaced per user and video:
+The `internal/storage` package defines a minimal interface (`Save`, `Open`, `Delete`) and ships local-filesystem and S3-compatible implementations. Set `STORAGE_DRIVER=local` (the default) or `STORAGE_DRIVER=s3` and configure the `S3_*` variables. Object keys are identical across drivers and namespaced per user and video:
 
 ```text
 storage/{user_id}/{video_id}/{original_filename}   source file
@@ -112,7 +114,7 @@ storage/{user_id}/{video_id}/hls/{rendition}/...   variant playlists + segments
 storage/{user_id}/{video_id}/thumbnail.jpg         poster frame
 ```
 
-The interface is the seam through which an S3-compatible driver can be added without touching services.
+Both the API and worker select the same driver from configuration, so uploads, transcoding reads, HLS outputs, and signed playback all use the configured backend.
 
 ### Upload pipeline
 
@@ -181,7 +183,7 @@ internal/
   logger/                     slog setup
   middleware/                 request ID, recovery, logging, CORS, auth
   queue/                      Redis Streams producer/consumer with retry
-  storage/                    storage abstraction + local filesystem driver
+  storage/                    storage abstraction + local and S3 drivers
   transcoder/                 ffprobe/FFmpeg wrapper: HLS renditions, thumbnails
   users/                      user model, repository, service, handler
   videos/                     video model, repository, service, handler, job types
@@ -218,6 +220,14 @@ WEB_PORT=3001 API_PORT=8081 docker compose up --build
 ```
 
 The web image is built with the API URL baked in, and the API CORS origin follows `WEB_PORT`, so use `--build` whenever either port changes. `PUBLIC_HOST` can be set when the stack is accessed through a hostname other than `localhost`. On memory-constrained Docker hosts, add `--parallel 1` to limit concurrent image builds.
+
+To run the stack against a local MinIO bucket instead of the filesystem:
+
+```bash
+docker compose -f compose.yaml -f compose.s3.yaml up -d --build
+```
+
+This starts MinIO on `http://localhost:9000` (console at `http://localhost:9001`), creates the `streamix` bucket, and configures the API and worker to use it. Override `S3_BUCKET`, `S3_ACCESS_KEY_ID`, or `S3_SECRET_ACCESS_KEY` when needed. Existing local-filesystem videos are not migrated when switching drivers.
 
 The compose stack reads `JWT_SECRET`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME` from the shell or the root `.env` file. Development defaults are provided for all four; change `JWT_SECRET` before exposing the stack beyond your machine. `PLAYBACK_TOKEN_TTL` defaults to `1h`.
 
@@ -337,8 +347,15 @@ Transcoder tests generate real media with FFmpeg and are skipped when the binari
 | `JWT_ACCESS_TOKEN_TTL` | no | `15m` | Access token lifetime (Go duration) |
 | `JWT_REFRESH_TOKEN_TTL` | no | `168h` | Refresh token lifetime (Go duration) |
 | `PLAYBACK_TOKEN_TTL` | no | `1h` | Signed playback URL lifetime (Go duration) |
-| `STORAGE_DRIVER` | no | `local` | Storage backend (only `local` is implemented) |
+| `STORAGE_DRIVER` | no | `local` | Storage backend (`local` or `s3`) |
 | `LOCAL_STORAGE_ROOT` | no | `storage` | Root directory for local storage |
+| `S3_ENDPOINT` | no | — | Custom S3-compatible endpoint, for example `minio:9000`; leave empty for AWS |
+| `S3_REGION` | no | `us-east-1` | S3 region |
+| `S3_BUCKET` | when `STORAGE_DRIVER=s3` | — | Bucket for sources, HLS outputs, and thumbnails |
+| `S3_ACCESS_KEY_ID` | no | — | Static S3 access key; omit to use the default AWS credential chain |
+| `S3_SECRET_ACCESS_KEY` | no | — | Static S3 secret key |
+| `S3_USE_SSL` | no | `true` | Use HTTPS for a custom endpoint |
+| `S3_FORCE_PATH_STYLE` | no | `false` | Use path-style addressing; required by many MinIO setups |
 | `QUEUE_DRIVER` | no | `redis` | Job queue backend (only `redis` is implemented) |
 | `REDIS_ADDR` | no | `localhost:6379` | Redis address |
 | `REDIS_PASSWORD` | no | — | Redis password |
@@ -567,7 +584,7 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 
 **Small packages, narrow interfaces.** Backend code lives in `internal/*` packages that each own one concern. Dependencies flow in one direction — handlers call services, services call repositories — and services depend on interfaces they define, never on concrete implementations. This is what makes the video service testable with in-memory mocks and the worker independent of the API process.
 
-**Infrastructure as seams.** Storage, queue, and transcoding are all behind interfaces with real, runnable local implementations. Adding an S3 driver or swapping Redis for another broker should never touch business logic.
+**Infrastructure as seams.** Storage, queue, and transcoding are all behind interfaces with real, runnable implementations. The local filesystem and S3 drivers share one storage contract, and swapping Redis for another broker should never touch business logic.
 
 **Failures are explicit.** Uploads roll back orphaned objects, jobs that fail transiently are retried inside a bounded window, and permanent failures land in a `failed` terminal state instead of looping forever. Error responses are a single standard envelope so clients and the frontend handle errors uniformly.
 
@@ -582,10 +599,9 @@ Screenshots are not yet captured. The following placeholders will be filled as t
 
 The following milestones follow naturally from the current implementation:
 
-1. **S3-compatible storage driver** — a second implementation of the `Storage` interface so uploads and HLS outputs can live in object storage.
-2. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
-3. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
-4. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
+1. **Realtime status** — replace 5-second polling with WebSocket or SSE updates pushed from the worker.
+2. **Deployment** — Kubernetes manifests and CI/CD for the API, worker, and web application.
+3. **Observability** — request metrics, worker job metrics (duration, failure rate), and structured log aggregation.
 
 ## Contributing
 

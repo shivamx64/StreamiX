@@ -10,6 +10,7 @@ import { AuthEmailField } from "@/components/auth/auth-email-field";
 import { AuthFormCard } from "@/components/auth/auth-form-card";
 import { AuthPasswordField } from "@/components/auth/auth-password-field";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
+import { safeRedirectPath } from "@/lib/navigation";
 import { useAuthenticationContext } from "@/providers/authentication-provider";
 import {
   loginSchema,
@@ -32,7 +33,11 @@ export default function LoginPage() {
     const success = await login(values);
 
     if (success) {
-      router.replace("/dashboard");
+      const nextPath = safeRedirectPath(
+        new URLSearchParams(window.location.search).get("next"),
+      );
+
+      router.replace(nextPath ?? "/dashboard");
     }
   });
 

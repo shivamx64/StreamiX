@@ -11,6 +11,7 @@ import { AuthFormCard } from "@/components/auth/auth-form-card";
 import { AuthNameField } from "@/components/auth/auth-name-field";
 import { AuthPasswordField } from "@/components/auth/auth-password-field";
 import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
+import { safeRedirectPath } from "@/lib/navigation";
 import { useAuthenticationContext } from "@/providers/authentication-provider";
 import {
   registerSchema,
@@ -43,7 +44,11 @@ export default function SignupPage() {
     });
 
     if (success) {
-      router.replace("/dashboard");
+      const nextPath = safeRedirectPath(
+        new URLSearchParams(window.location.search).get("next"),
+      );
+
+      router.replace(nextPath ?? "/dashboard");
     }
   });
 

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Cpu, Film, ShieldCheck } from "lucide-react";
 
 import { AuthLogo } from "@/components/auth/auth-logo";
+import { GuestRouteGuard } from "@/components/auth/guest-route-guard";
 import { ThemeToggle } from "@/components/shared-ui/theme-toggle";
 
 type AuthLayoutProps = {
@@ -36,7 +37,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </header>
 
         <main className="flex flex-1 items-center justify-center px-6 py-10 md:px-10">
-          <div className="w-full max-w-md">{children}</div>
+          <div className="w-full max-w-md">
+            <GuestRouteGuard>{children}</GuestRouteGuard>
+          </div>
         </main>
 
         <footer className="px-6 py-6 md:px-10">

@@ -47,8 +47,8 @@ const flow = [
         icon: Database,
       },
       {
-        name: "Local media",
-        detail: "source file",
+        name: "Media storage",
+        detail: "local or S3",
         icon: HardDrive,
       },
     ],
@@ -103,9 +103,9 @@ const flow = [
 
 const constraints = [
   {
-    title: "Local by default",
+    title: "Storage is pluggable",
     description:
-      "Media lives on the filesystem behind a storage interface. Object storage is an adapter, not a current dependency.",
+      "Media lives on the local filesystem or in an S3-compatible bucket behind one interface. The API and worker always share the configured backend.",
   },
   {
     title: "No edge layer",
@@ -137,7 +137,7 @@ export function ArchitectureSection() {
 
         <p className="max-w-sm text-pretty text-sm leading-7 text-muted-foreground md:text-base">
           One Next.js app, a Go API, PostgreSQL, Redis Streams, a worker, and
-          local media storage. Every job can be traced by hand.
+          pluggable media storage. Every job can be traced by hand.
         </p>
       </div>
 
@@ -212,9 +212,9 @@ export function ArchitectureSection() {
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {[
-                  "S3-compatible storage",
                   "CDN delivery",
                   "Autoscaled workers",
+                  "Realtime status",
                 ].map((item) => (
                   <span
                     key={item}

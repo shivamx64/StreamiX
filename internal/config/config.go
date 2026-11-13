@@ -89,6 +89,18 @@ type AuthConfig struct {
 type StorageConfig struct {
 	Driver    string
 	LocalRoot string
+	S3        S3Config
+}
+
+// S3Config contains S3-compatible object storage settings.
+type S3Config struct {
+	Endpoint        string
+	Region          string
+	Bucket          string
+	AccessKeyID     string
+	SecretAccessKey string
+	UseSSL          bool
+	ForcePathStyle  bool
 }
 
 // QueueConfig contains job queue configuration.

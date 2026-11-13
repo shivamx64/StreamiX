@@ -33,7 +33,7 @@ const faqs = [
   {
     question: "Where is media stored?",
     answer:
-      "On the local filesystem by default, namespaced by user and video. Storage is behind an interface, but an S3-compatible driver is not implemented in the current build.",
+      "On the local filesystem by default, or in an S3-compatible bucket when configured with STORAGE_DRIVER=s3. Both drivers share one storage interface, and objects are namespaced by user and video.",
   },
   {
     question: "What happens when a job fails?",
@@ -43,7 +43,7 @@ const faqs = [
   {
     question: "Is there a hosted version?",
     answer:
-      "No. StreamiX is a public repository that you run yourself. CDN delivery, object storage, autoscaled workers, and live streaming are not part of the current build.",
+      "No. StreamiX is a public repository that you run yourself. CDN delivery, autoscaled workers, and live streaming are not part of the current build.",
   },
 ];
 

@@ -1,0 +1,63 @@
+name: streamix
+
+services:
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-streamix}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-streamix-secret}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-streamix}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-streamix-secret}
+      S3_BUCKET: ${S3_BUCKET:-streamix}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"; do
+          sleep 2
+        done
+        mc mb --ignore-existing "local/$$S3_BUCKET"
+
+  api:
+    environment:
+      STORAGE_DRIVER: s3
+      S3_ENDPOINT: minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: ${S3_BUCKET:-streamix}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-streamix}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-streamix-secret}
+      S3_USE_SSL: "false"
+      S3_FORCE_PATH_STYLE: "true"
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+
+  worker:
+    environment:
+      STORAGE_DRIVER: s3
+      S3_ENDPOINT: minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: ${S3_BUCKET:-streamix}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-streamix}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-streamix-secret}
+      S3_USE_SSL: "false"
+      S3_FORCE_PATH_STYLE: "true"
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+
+volumes:
+  minio_data:
